@@ -3,6 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
 @Service
+@RequiredArgsConstructor
 public class AdminService {
 	private static final Logger LOG = LoggerFactory.getLogger(AdminService.class);
 
@@ -23,11 +25,6 @@ public class AdminService {
 
 	@Value("${admin.password:admin}")
 	private String defaultPassword;
-
-	public AdminService(UserService userService, UserRepository userRepository) {
-		this.userService = userService;
-		this.userRepository = userRepository;
-	}
 
 	@PostConstruct
 	public void initialiseAdminUser() {

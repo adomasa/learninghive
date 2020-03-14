@@ -1,14 +1,15 @@
 package distributed.monolith.learninghive.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class UserRefreshToken {
 
 	@Id
@@ -16,19 +17,13 @@ public class UserRefreshToken {
 	private long id;
 
 	@Column(nullable = false, unique = true)
+	@NonNull
 	private String token;
 
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(nullable = false, unique = true)
 	@JsonIgnore
+	@NonNull
 	private User user;
-
-	public UserRefreshToken() {
-	}
-
-	public UserRefreshToken(String token, User user) {
-		this.token = token;
-		this.user = user;
-	}
 
 }

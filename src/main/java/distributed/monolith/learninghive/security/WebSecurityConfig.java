@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.security;
 
 import distributed.monolith.learninghive.model.constants.Paths;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -18,12 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final JwtTokenProvider jwtTokenProvider;
-
-	public WebSecurityConfig(JwtTokenProvider jwtTokenProvider) {
-		this.jwtTokenProvider = jwtTokenProvider;
-	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

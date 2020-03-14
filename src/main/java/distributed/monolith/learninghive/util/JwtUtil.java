@@ -7,7 +7,6 @@ public final class JwtUtil {
 	public static final String TOKEN_PREFIX = "Bearer ";
 
 	private JwtUtil() {
-
 	}
 
 	public static Optional<String> resolveToken(String bearerToken) {

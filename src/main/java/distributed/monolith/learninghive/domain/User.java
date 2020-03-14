@@ -1,10 +1,7 @@
 package distributed.monolith.learninghive.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
@@ -14,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
 	@Id
@@ -46,6 +44,4 @@ public class User {
 	@OneToMany(mappedBy = "supervisor")
 	private List<User> subordinates;
 
-	protected User() {
-	}
 }

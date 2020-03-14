@@ -14,6 +14,6 @@ public interface UserRefreshTokenRepository extends CrudRepository<UserRefreshTo
 
 	Optional<UserRefreshToken> findByUser(User user);
 
-	Optional<UserRefreshToken> removeByUser(User user);
+	Optional<UserRefreshToken> findByUserId(Long userId);
 
 }

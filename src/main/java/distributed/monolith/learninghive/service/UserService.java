@@ -7,6 +7,7 @@ import distributed.monolith.learninghive.model.exception.UserNotFoundException;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,17 +16,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-
-	public UserService(UserRepository userRepository,
-	                   PasswordEncoder passwordEncoder) {
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-	}
 
 	public void delete(String email) {
 		userRepository.deleteByEmail(email)
