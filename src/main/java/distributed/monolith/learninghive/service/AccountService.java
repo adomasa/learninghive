@@ -9,16 +9,18 @@ import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.repository.UserRefreshTokenRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
 	private static final Logger LOG = LoggerFactory.getLogger(AccountService.class);
 
@@ -27,17 +29,6 @@ public class AccountService {
 	private final PasswordEncoder passwordEncoder;
 
 	private final JwtTokenProvider tokenProvider;
-
-	@Autowired
-	public AccountService(UserRefreshTokenRepository userRefreshTokenRepository,
-	                      UserRepository userRepository,
-	                      PasswordEncoder passwordEncoder,
-	                      JwtTokenProvider tokenProvider) {
-		this.userRefreshTokenRepository = userRefreshTokenRepository;
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.tokenProvider = tokenProvider;
-	}
 
 	public TokenPair doLoginUser(User user) {
 		String jwt = tokenProvider.createToken(user.getId(), user.getRoles());
@@ -57,16 +48,20 @@ public class AccountService {
 	 * Currently, it doesn't expire. Ideally it should have expiration date
 	 */
 	private String createRefreshToken(User user) {
-		if (userRefreshTokenRepository.removeByUser(user).isPresent()) {
-			LOG.debug("Removing previous refresh token");
+		Optional<UserRefreshToken> oldToken = userRefreshTokenRepository.findByUser(user);
+		String newTokenValue = RandomStringUtils.randomAlphanumeric(128);
+
+		if (oldToken.isPresent()) {
+			oldToken.get().setToken(newTokenValue);
+		} else {
+			userRefreshTokenRepository.save(new UserRefreshToken(newTokenValue, user));
 		}
 
-		String token = RandomStringUtils.randomAlphanumeric(128);
-		userRefreshTokenRepository.save(new UserRefreshToken(token, user));
-		return token;
+		return newTokenValue;
 	}
 
 
+	@Transactional
 	public TokenPair loginUser(UserLogin userLogin) {
 		return userRepository.findByEmail(userLogin.getEmail())
 				.map(user -> {
@@ -79,9 +74,11 @@ public class AccountService {
 				.orElseThrow(UserNotFoundException::new);
 	}
 
-
-	public void logoutUser(String refreshToken) {
-		userRefreshTokenRepository.findByToken(refreshToken)
+	/**
+	 * Remove refresh token from database
+	 */
+	public void logoutUser(long userId) {
+		userRefreshTokenRepository.findByUserId(userId)
 				.ifPresent(userRefreshTokenRepository::delete);
 	}
 }

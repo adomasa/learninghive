@@ -11,8 +11,7 @@ import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.AccountService;
 import distributed.monolith.learninghive.service.UserService;
-import distributed.monolith.learninghive.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,23 +19,14 @@ import javax.validation.Valid;
 import java.util.Collections;
 
 import static distributed.monolith.learninghive.model.constants.Paths.*;
-import static distributed.monolith.learninghive.util.JwtUtil.HEADER_TOKEN;
 
 @RestController
+@RequiredArgsConstructor
 public class AccountController {
 
 	private final AccountService accountService;
 	private final UserService userService;
 	private final SecurityService securityService;
-
-	@Autowired
-	public AccountController(AccountService accountService,
-	                         UserService userService,
-	                         SecurityService securityService) {
-		this.accountService = accountService;
-		this.userService = userService;
-		this.securityService = securityService;
-	}
 
 	@PostMapping(path = ACCOUNT_REGISTER)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -63,10 +53,9 @@ public class AccountController {
 
 	@DeleteMapping(path = ACCOUNT_LOGOUT)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void logoutUser(@Valid @RequestHeader(HEADER_TOKEN) String rawToken) {
-		String token = JwtUtil.resolveToken(rawToken)
-				.orElseThrow(InvalidRefreshTokenException::new);
-		accountService.logoutUser(token);
+	public void logoutUser() {
+		long userId = securityService.getLoggedUserId();
+		accountService.logoutUser(userId);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
