@@ -10,6 +10,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 public class LearningHiveApplication {
+
 	public static void main(String[] args) {
 		SpringApplication.run(LearningHiveApplication.class, args);
 	}
