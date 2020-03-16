@@ -11,14 +11,13 @@ public class PasswordConstraintValidator implements ConstraintValidator<ValidPas
 
 	@Override
 	public void initialize(ValidPassword constraintAnnotation) {
-		// we could load a dictionary from classpath here
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
 		PasswordValidator passwordValidator = new PasswordValidator(Arrays.asList(
 				// at least 8 characters
-				new LengthRule(8, 1024),
+				new LengthRule(8, 254),
 				// at least one upper-case character
 				new CharacterRule(EnglishCharacterData.UpperCase, 1),
 				// at least one lower-case character

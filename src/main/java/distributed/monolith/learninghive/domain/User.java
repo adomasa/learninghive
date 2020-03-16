@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.util.List;
@@ -17,12 +18,15 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
+
 	@Column(nullable = false, unique = true)
 	@NonNull
+	@Length(max = 254, message = "Email is too long")
 	private String email;
 
 	@JsonIgnore
 	@Column(nullable = false)
+	@Length(max = 254, message = "Password is too long")
 	@NonNull
 	private String password;
 
