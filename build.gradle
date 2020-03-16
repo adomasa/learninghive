@@ -30,7 +30,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.session:spring-session-core'
+
+	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.10'
+	compile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+	//password validation
+	compile group: 'org.passay', name: 'passay', version: '1.5.0'
+	//random string generation
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
