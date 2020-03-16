@@ -7,14 +7,28 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import java.util.Locale;
 
 @SpringBootApplication
-public class LearninghiveApplication {
+public class LearningHiveApplication {
 	@Autowired
 	private YamlConfiguration configuration;
 
 	public static void main(String[] args) {
-		SpringApplication.run(LearninghiveApplication.class, args);
+		SpringApplication.run(LearningHiveApplication.class, args);
+	}
+
+	/**
+	 * Hard coded english locale
+	 */
+	@Bean
+	public LocaleResolver localeResolver() {
+		SessionLocaleResolver resolver = new SessionLocaleResolver();
+		resolver.setDefaultLocale(Locale.ENGLISH);
+		return resolver;
 	}
 
 	@Bean

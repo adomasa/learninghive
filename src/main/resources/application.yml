@@ -1,3 +1,25 @@
+spring:
+  datasource:
+    url:
+    username:
+    password:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+  jpa:
+    hibernate:
+      ddl-auto: create #drop n create table again, good for testing, comment this in production
+
+security:
+  jwt:
+    token:
+      #https://www.grc.com/passwords.htm  63 random printable ASCII characters:
+      secret:
+      expireLength: 900000 # 15 minutes
+
+server:
+  port: 8080
+
 email:
   username:
   password:
