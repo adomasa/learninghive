@@ -19,3 +19,8 @@ security:
 
 server:
   port: 8080
+
+email:
+  username:
+  password:
+  host: smtp.gmail.com
