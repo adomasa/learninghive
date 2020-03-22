@@ -19,6 +19,7 @@ security:
 
 server:
   port: 8080
+  domain:
 
 email:
   username:
