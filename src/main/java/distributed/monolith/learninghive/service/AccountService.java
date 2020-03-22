@@ -1,12 +1,12 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.Link;
+import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.domain.UserRefreshToken;
 import distributed.monolith.learninghive.model.exception.UserNotFoundException;
 import distributed.monolith.learninghive.model.exception.WrongPasswordException;
 import distributed.monolith.learninghive.model.request.UserLogin;
-import distributed.monolith.learninghive.model.request.UserRegistrationLink;
+import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.repository.LinkRepository;
 import distributed.monolith.learninghive.repository.UserRefreshTokenRepository;
@@ -21,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -93,8 +92,8 @@ public class AccountService {
 				.ifPresent(userRefreshTokenRepository::delete);
 	}
 
-	public String createRegisterLink(UserRegistrationLink userRegistrationLink){
-		Optional<User> userWhoInvited = userRepository.findById(userRegistrationLink.getUserWhoInvitedId());
+	public String createInvitationLink(UserInvitation userInvitation, long userId){
+		Optional<User> userWhoInvited = userRepository.findById(userId);
 
 		StringBuilder str = new StringBuilder("http://");
 		str.append(domain);
@@ -105,13 +104,12 @@ public class AccountService {
 		str.append(randomString);
 
 		if(userWhoInvited.isPresent()) {
-			Link link = new Link(
-					userRegistrationLink.getEmail(),
-					new Date(),
+			Invitation invitation = new Invitation(
+					userInvitation.getEmail(),
 					randomString,
 					userWhoInvited.get()
 			);
-			linkRepository.save(link);
+			linkRepository.save(invitation);
 		}
 
 		return str.toString();

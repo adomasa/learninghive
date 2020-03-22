@@ -1,18 +1,19 @@
 package distributed.monolith.learninghive.domain;
 
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "links")
+@Table(name = "invitations")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class Link {
+public class Invitation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -24,12 +25,12 @@ public class Link {
     private String email;
 
     @Column(nullable = false)
-    @NonNull
+    @CreationTimestamp
     private Date date;
 
     @Column(nullable = false, unique = true)
     @NonNull
-    private String link;
+    private String validationToken;
 
     @Column(nullable = false)
     @NonNull
