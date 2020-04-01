@@ -32,7 +32,6 @@ public class Invitation {
     @NonNull
     private String validationToken;
 
-    @Column(nullable = false)
     @NonNull
     @ManyToOne
     private User userWhoInvited;
