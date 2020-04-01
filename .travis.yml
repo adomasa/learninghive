@@ -1,2 +1,9 @@
 language: java
 jdk: openjdk11
+
+services:
+  - postgresql
+  
+
+script:
+  - ./gradlew build
