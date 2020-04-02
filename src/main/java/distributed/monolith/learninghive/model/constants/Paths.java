@@ -8,6 +8,11 @@ public final class Paths {
 	public static final String ACCOUNT_INFO = "/account/info";
 	public static final String ACCOUNT_INVITE = "/account/invite";
 
+	public static final String TOPIC_ADD = "/topic/add";
+	public static final String TOPIC_QUERY = "/topic/q";
+	public static final String TOPIC_DELETE = "/topic/delete";
+	public static final String TOPIC_UPDATE = "/topic/update";
+
 	private Paths() {
 	}
 }
