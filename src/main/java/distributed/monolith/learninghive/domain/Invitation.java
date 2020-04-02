@@ -15,24 +15,24 @@ import java.util.Date;
 @NoArgsConstructor
 public class Invitation {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    @Column(nullable = false, unique = true)
-    @NonNull
-    @Length(max = 254, message = "Email is too long")
-    private String email;
+	@Column(nullable = false, unique = true)
+	@NonNull
+	@Length(max = 254, message = "Email is too long")
+	private String email;
 
-    @Column(nullable = false)
-    @CreationTimestamp
-    private Date date;
+	@Column(nullable = false)
+	@CreationTimestamp
+	private Date date;
 
-    @Column(nullable = false, unique = true)
-    @NonNull
-    private String validationToken;
+	@Column(nullable = false, unique = true)
+	@NonNull
+	private String validationToken;
 
-    @NonNull
-    @ManyToOne
-    private User userWhoInvited;
+	@NonNull
+	@ManyToOne
+	private User userWhoInvited;
 }

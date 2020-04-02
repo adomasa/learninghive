@@ -3,7 +3,6 @@ package distributed.monolith.learninghive.controller;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.InvalidRefreshTokenException;
-import distributed.monolith.learninghive.model.request.RefreshToken;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.request.UserRegistration;
@@ -40,8 +39,8 @@ public class AccountController {
 	@PostMapping(path = ACCOUNT_REFRESH)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
-	TokenPair tokenRefresh(@Valid @RequestBody RefreshToken refreshToken) {
-		return accountService.refreshAccessTokens(refreshToken.getRefreshToken())
+	TokenPair tokenRefresh(@RequestParam String refreshToken) {
+		return accountService.refreshAccessTokens(refreshToken)
 				.orElseThrow(InvalidRefreshTokenException::new);
 	}
 
@@ -69,7 +68,7 @@ public class AccountController {
 
 	@PostMapping(path = ACCOUNT_INVITE)
 	public @ResponseBody
-	String generateRegistrationLink(@Valid @RequestBody UserInvitation userInvitation){
+	String generateRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		long userId = securityService.getLoggedUserId();
 		return accountService.createInvitationLink(userInvitation, userId);
 	}

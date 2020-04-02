@@ -1,13 +1,9 @@
 package distributed.monolith.learninghive.model.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class TokenPair {
-	private final String jwt;
-	@JsonProperty("refresh_token")
-	private final String refreshToken;
+	String jwt;
+	String refreshToken;
 }
