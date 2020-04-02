@@ -3,10 +3,10 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.domain.UserRefreshToken;
-import distributed.monolith.learninghive.model.exception.UserNotFoundException;
+import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.exception.WrongPasswordException;
-import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.request.UserInvitation;
+import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.repository.LinkRepository;
 import distributed.monolith.learninghive.repository.UserRefreshTokenRepository;
@@ -81,7 +81,7 @@ public class AccountService {
 						throw new WrongPasswordException();
 					}
 				})
-				.orElseThrow(UserNotFoundException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class AccountService {
 				.ifPresent(userRefreshTokenRepository::delete);
 	}
 
-	public String createInvitationLink(UserInvitation userInvitation, long userId){
+	public String createInvitationLink(UserInvitation userInvitation, long userId) {
 		Optional<User> userWhoInvited = userRepository.findById(userId);
 
 		StringBuilder str = new StringBuilder("http://");
@@ -103,7 +103,7 @@ public class AccountService {
 		String randomString = RandomStringUtils.randomAlphanumeric(32);
 		str.append(randomString);
 
-		if(userWhoInvited.isPresent()) {
+		if (userWhoInvited.isPresent()) {
 			Invitation invitation = new Invitation(
 					userInvitation.getEmail(),
 					randomString,

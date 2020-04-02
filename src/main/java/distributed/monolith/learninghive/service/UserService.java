@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateEmailException;
-import distributed.monolith.learninghive.model.exception.UserNotFoundException;
+import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.repository.UserRepository;
@@ -25,12 +25,12 @@ public class UserService {
 
 	public void delete(String email) {
 		userRepository.deleteByEmail(email)
-				.orElseThrow(UserNotFoundException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
 	}
 
 	public User search(UserRegistration userRegistration) {
 		return userRepository.findByEmail(userRegistration.getEmail())
-				.orElseThrow(UserNotFoundException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
 	}
 
 	public User registerUser(UserRegistration userRegistration, List<Role> roles) {
@@ -46,8 +46,7 @@ public class UserService {
 				roles
 		);
 
-		userRepository.save(user);
-		return user;
+		return userRepository.save(user);
 	}
 
 	public UserInfo getUserInfo(Long userId) {
