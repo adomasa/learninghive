@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -50,6 +49,7 @@ public class AccountService {
 	 * @return newly generated access token or nothing, if the refresh token is not valid
 	 */
 	public Optional<TokenPair> refreshAccessTokens(String refreshToken) {
+		LOG.debug("AccountService::refreshAccessTokens, refreshToken={}", refreshToken);
 		return userRefreshTokenRepository.findByToken(refreshToken)
 				.map(userRefreshToken -> doLoginUser(userRefreshToken.getUser()));
 	}
@@ -61,17 +61,20 @@ public class AccountService {
 		Optional<UserRefreshToken> oldToken = userRefreshTokenRepository.findByUser(user);
 		String newTokenValue = RandomStringUtils.randomAlphanumeric(128);
 
+		UserRefreshToken newRefreshToken;
 		if (oldToken.isPresent()) {
-			oldToken.get().setToken(newTokenValue);
+			UserRefreshToken refreshToken = oldToken.get();
+			refreshToken.setToken(newTokenValue);
+			newRefreshToken = refreshToken;
 		} else {
-			userRefreshTokenRepository.save(new UserRefreshToken(newTokenValue, user));
+			newRefreshToken = new UserRefreshToken(newTokenValue, user);
 		}
+
+		userRefreshTokenRepository.save(newRefreshToken);
 
 		return newTokenValue;
 	}
 
-
-	@Transactional
 	public TokenPair loginUser(UserLogin userLogin) {
 		return userRepository.findByEmail(userLogin.getEmail())
 				.map(user -> {
