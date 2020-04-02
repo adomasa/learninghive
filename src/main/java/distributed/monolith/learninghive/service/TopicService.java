@@ -8,12 +8,13 @@ import distributed.monolith.learninghive.model.request.TopicRequest;
 import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +25,10 @@ public class TopicService {
 
 	private final TopicRepository topicRepository;
 	private final EntityManager entityManager;
+	private final ModelMapper modelMapper;
 
 	public void delete(Long id) {
-		Topic topic = topicRepository
+		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName()));
 		//todo find out what's expected
@@ -40,51 +42,44 @@ public class TopicService {
 	public List<TopicResponse> searchByTitlePart(String titlePart) {
 		return topicRepository.findByTitleIgnoreCaseContaining(titlePart)
 				.parallelStream()
-				.map(TopicResponse::new) //todo temp
+				.map(t -> modelMapper.map(t, TopicResponse.class))
 				.collect(Collectors.toList());
 	}
 
-	public Topic createTopic(TopicRequest topicRequest) {
+	public TopicResponse createTopic(TopicRequest topicRequest) {
 		if (topicRepository.findByTitle(topicRequest.getTitle()).isPresent()) {
 			throw new DuplicateTitleException();
 		}
 
-		Topic topic = new Topic();
+		var topic = new Topic();
 		mountTopicEntity(topic, topicRequest);
-
-		return topicRepository.save(topic);
+		return modelMapper.map(topicRepository.save(topic), TopicResponse.class);
 	}
 
-	//todo rework
-	@Transactional
-	public void updateTopic(Long id, TopicRequest topicRequest) {
-		Topic topic = topicRepository
+	public TopicResponse updateTopic(Long id, TopicRequest topicRequest) {
+		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName()));
 		mountTopicEntity(topic, topicRequest);
+
+		return modelMapper.map(topicRepository.save(topic), TopicResponse.class);
 	}
 
-	public void mountTopicEntity(Topic topic, TopicRequest topicRequest) {
-		// todo find out what has been updated in a better way
-		if (topicRequest.getTitle() != null) {
-			topic.setTitle(topicRequest.getTitle());
-		}
+	/* todo validate topic relations hierarchy
+	 *  get all children, get all parents, make sure there are no matches */
+	private void mountTopicEntity(Topic destination, TopicRequest source) {
+		destination.setTitle(source.getTitle());
+		destination.setContent(source.getContent());
 
-		if (topicRequest.getContent() != null) {
-			topic.setContent(topicRequest.getContent());
-		}
+		destination.setChildren(source.getChildrenId() == null ?
+				null : getTopicsFromIdLazy(source.getChildrenId()));
 
-		if (topicRequest.getChildrenId() != null) {
-			topic.setChildren(getTopicsFromIdLazy(topicRequest.getChildrenId()));
-		}
-
-		if (topicRequest.getParentId() != null) {
-			topic.setParent(getTopicFromIdLazy(topicRequest.getParentId()));
-		}
+		destination.setParent(source.getParentId() == null ?
+				null : getTopicFromIdLazy(source.getParentId()));
 	}
 
 	//todo rework
-	public List<Topic> getTopicsFromIdLazy(List<Long> idList) {
+	private List<Topic> getTopicsFromIdLazy(@NotNull List<Long> idList) {
 		return idList
 				.parallelStream()
 				.map(this::getTopicFromIdLazy)
@@ -92,7 +87,7 @@ public class TopicService {
 	}
 
 	//todo rework
-	public Topic getTopicFromIdLazy(Long id) {
+	private Topic getTopicFromIdLazy(@NotNull Long id) {
 		try {
 			return entityManager.getReference(Topic.class, id);
 		} catch (IllegalArgumentException e) {

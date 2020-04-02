@@ -29,14 +29,14 @@ public class TopicController {
 	@PostMapping(path = TOPIC_ADD)
 	public @ResponseBody
 	TopicResponse addTopic(@Valid @RequestBody TopicRequest topicRequest) {
-		return new TopicResponse(topicService.createTopic(topicRequest));
+		return topicService.createTopic(topicRequest);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@PutMapping(path = TOPIC_UPDATE)
-	public void updateTopic(@RequestParam(name = "id") Long id,
-	                        @Valid @RequestBody TopicRequest topicRequest) {
-		topicService.updateTopic(id, topicRequest);
+	public TopicResponse updateTopic(@RequestParam(name = "id") Long id,
+	                                 @Valid @RequestBody TopicRequest topicRequest) {
+		return topicService.updateTopic(id, topicRequest);
 	}
 
 	@DeleteMapping(path = TOPIC_DELETE)
