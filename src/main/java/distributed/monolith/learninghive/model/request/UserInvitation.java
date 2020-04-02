@@ -1,14 +1,11 @@
 package distributed.monolith.learninghive.model.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
+import lombok.Value;
 
 import javax.validation.constraints.Email;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class UserInvitation {
-    @Email
-    private final String email;
+	@Email
+	String email;
 }

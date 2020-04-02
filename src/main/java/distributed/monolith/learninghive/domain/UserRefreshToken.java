@@ -9,7 +9,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserRefreshToken {
 
 	@Id

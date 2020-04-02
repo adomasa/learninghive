@@ -2,25 +2,23 @@ package distributed.monolith.learninghive.model.request;
 
 
 import distributed.monolith.learninghive.model.validation.ValidPassword;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class UserRegistration {
 	@Email
-	private final String email;
+	String email;
 
 	@NotBlank
 	@ValidPassword
-	private final String password;
+	String password;
 
 	@NotBlank
-	private final String name;
+	String name;
 
 	@NotBlank
-	private final String surname;
+	String surname;
 }

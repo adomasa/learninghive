@@ -67,7 +67,7 @@ public class AccountController {
 		return userService.getUserInfo(userId);
 	}
 
-	@PostMapping(path = ACCOUNT_REGISTERLINK)
+	@PostMapping(path = ACCOUNT_INVITE)
 	public @ResponseBody
 	String generateRegistrationLink(@Valid @RequestBody UserInvitation userInvitation){
 		long userId = securityService.getLoggedUserId();
