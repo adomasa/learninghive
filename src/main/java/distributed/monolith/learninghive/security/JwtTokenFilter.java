@@ -1,8 +1,6 @@
 package distributed.monolith.learninghive.security;
 
 import distributed.monolith.learninghive.util.JwtUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,7 +15,6 @@ import java.util.Optional;
 import static distributed.monolith.learninghive.util.JwtUtil.HEADER_TOKEN;
 
 public class JwtTokenFilter extends OncePerRequestFilter {
-	private static final Logger LOG = LoggerFactory.getLogger(JwtTokenFilter.class);
 
 	private final JwtTokenProvider jwtTokenProvider;
 
