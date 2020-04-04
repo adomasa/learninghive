@@ -54,17 +54,14 @@ public class AccountService {
 	 * Currently, it doesn't expire. Ideally it should have expiration date
 	 */
 	private String createRefreshToken(User user) {
-		Optional<UserRefreshToken> oldToken = refreshTokenRepository.findByUser(user);
 		String newTokenValue = RandomStringUtils.randomAlphanumeric(128);
-
-		UserRefreshToken newRefreshToken;
-		if (oldToken.isPresent()) {
-			UserRefreshToken refreshToken = oldToken.get();
-			refreshToken.setToken(newTokenValue);
-			newRefreshToken = refreshToken;
-		} else {
-			newRefreshToken = new UserRefreshToken(newTokenValue, user);
-		}
+		UserRefreshToken newRefreshToken = refreshTokenRepository
+				.findByUser(user)
+				.map(token -> {
+					token.setToken(newTokenValue);
+					return token;
+				})
+				.orElse(new UserRefreshToken(newTokenValue, user));
 
 		refreshTokenRepository.save(newRefreshToken);
 
