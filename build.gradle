@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.2.5.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+	id 'pmd'
 }
 
 group = 'distributed.monolith'
@@ -49,6 +50,12 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.security:spring-security-test'
+}
+
+pmd {
+	ruleSets = []
+	ruleSetConfig = rootProject.resources.text.fromFile('pmd/ruleset.xml')
+	ignoreFailures = false
 }
 
 test {

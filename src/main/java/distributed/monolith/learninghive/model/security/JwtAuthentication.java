@@ -10,6 +10,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class JwtAuthentication implements Authentication {
 
+	private static final long serialVersionUID = -6646662749654517349L;
 	@Getter
 	private final long userId;
 
@@ -41,7 +42,7 @@ public class JwtAuthentication implements Authentication {
 	}
 
 	@Override
-	public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+	public void setAuthenticated(boolean isAuthenticated) {
 		throw new UnsupportedOperationException("JWT authentication is always authenticated");
 	}
 

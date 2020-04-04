@@ -14,8 +14,6 @@ import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,9 +23,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AccountService {
-	private static final Logger LOG = LoggerFactory.getLogger(AccountService.class);
 
-	private final UserRefreshTokenRepository userRefreshTokenRepository;
+	private final UserRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final LinkRepository linkRepository;
@@ -49,8 +46,7 @@ public class AccountService {
 	 * @return newly generated access token or nothing, if the refresh token is not valid
 	 */
 	public Optional<TokenPair> refreshAccessTokens(String refreshToken) {
-		LOG.debug("AccountService::refreshAccessTokens, refreshToken={}", refreshToken);
-		return userRefreshTokenRepository.findByToken(refreshToken)
+		return refreshTokenRepository.findByToken(refreshToken)
 				.map(userRefreshToken -> doLoginUser(userRefreshToken.getUser()));
 	}
 
@@ -58,7 +54,7 @@ public class AccountService {
 	 * Currently, it doesn't expire. Ideally it should have expiration date
 	 */
 	private String createRefreshToken(User user) {
-		Optional<UserRefreshToken> oldToken = userRefreshTokenRepository.findByUser(user);
+		Optional<UserRefreshToken> oldToken = refreshTokenRepository.findByUser(user);
 		String newTokenValue = RandomStringUtils.randomAlphanumeric(128);
 
 		UserRefreshToken newRefreshToken;
@@ -70,7 +66,7 @@ public class AccountService {
 			newRefreshToken = new UserRefreshToken(newTokenValue, user);
 		}
 
-		userRefreshTokenRepository.save(newRefreshToken);
+		refreshTokenRepository.save(newRefreshToken);
 
 		return newTokenValue;
 	}
@@ -91,30 +87,29 @@ public class AccountService {
 	 * Remove refresh token from database
 	 */
 	public void logoutUser(long userId) {
-		userRefreshTokenRepository.findByUserId(userId)
-				.ifPresent(userRefreshTokenRepository::delete);
+		refreshTokenRepository.findByUserId(userId)
+				.ifPresent(refreshTokenRepository::delete);
 	}
 
 	public String createInvitationLink(UserInvitation userInvitation, long userId) {
-		Optional<User> userWhoInvited = userRepository.findById(userId);
+		User userWhoInvited = userRepository
+				.findById(userId)
+				.orElseThrow(() -> new IllegalStateException("User " + userId + " not found on DB"));
 
-		StringBuilder str = new StringBuilder("http://");
-		str.append(domain);
-		str.append(":");
-		str.append(port);
-		str.append("signupemail/");
-		String randomString = RandomStringUtils.randomAlphanumeric(32);
-		str.append(randomString);
+		String invitationToken = RandomStringUtils.randomAlphanumeric(32);
+		Invitation invitation = new Invitation(
+				userInvitation.getEmail(),
+				invitationToken,
+				userWhoInvited
+		);
+		linkRepository.save(invitation);
 
-		if (userWhoInvited.isPresent()) {
-			Invitation invitation = new Invitation(
-					userInvitation.getEmail(),
-					randomString,
-					userWhoInvited.get()
-			);
-			linkRepository.save(invitation);
-		}
-
-		return str.toString();
+		return new StringBuilder("http://")
+				.append(domain)
+				.append(':')
+				.append(port)
+				.append("signupemail/")
+				.append(invitationToken)
+				.toString();
 	}
 }
