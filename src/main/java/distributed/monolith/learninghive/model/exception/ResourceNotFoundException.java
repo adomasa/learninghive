@@ -8,6 +8,10 @@ public class ResourceNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = -4265132229531670617L;
 
+	public ResourceNotFoundException(Exception e, String resource) {
+		super(String.format("%s not found", resource), e);
+	}
+
 	public ResourceNotFoundException(String resource) {
 		super(String.format("%s not found", resource));
 	}

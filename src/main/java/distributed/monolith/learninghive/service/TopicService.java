@@ -91,7 +91,7 @@ public class TopicService {
 		try {
 			return entityManager.getReference(Topic.class, id);
 		} catch (IllegalArgumentException e) {
-			throw new ResourceNotFoundException(Topic.class.getName() + " " + e.getMessage());
+			throw new ResourceNotFoundException(e, Topic.class.getName());
 		}
 	}
 }

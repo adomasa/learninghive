@@ -39,7 +39,7 @@ public class AccountController {
 	@PostMapping(path = ACCOUNT_REFRESH)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
-	TokenPair tokenRefresh(@RequestParam(value = "token") String refreshToken) {
+	TokenPair tokenRefresh(@RequestParam("token") String refreshToken) {
 		return accountService.refreshAccessTokens(refreshToken)
 				.orElseThrow(InvalidRefreshTokenException::new);
 	}

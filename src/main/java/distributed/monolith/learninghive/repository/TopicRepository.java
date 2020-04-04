@@ -10,8 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TopicRepository extends CrudRepository<Topic, Long> {
 
-	void deleteById(Long id);
-
 	List<Topic> findByTitleIgnoreCaseContaining(String title);
 
 	Optional<Topic> findByTitle(String title);
