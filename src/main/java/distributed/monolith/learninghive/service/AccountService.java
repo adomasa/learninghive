@@ -77,7 +77,7 @@ public class AccountService {
 						throw new WrongPasswordException();
 					}
 				})
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userLogin.getEmail()));
 	}
 
 	/**

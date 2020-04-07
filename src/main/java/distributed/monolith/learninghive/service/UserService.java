@@ -8,8 +8,6 @@ import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,19 +16,24 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-	private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	public void delete(String email) {
 		userRepository.deleteByEmail(email)
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email)
+				);
 	}
 
 	public User search(UserRegistration userRegistration) {
 		return userRepository.findByEmail(userRegistration.getEmail())
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName()));
+				.orElseThrow(() -> new ResourceNotFoundException(
+								User.class.getSimpleName(),
+								userRegistration.getEmail()
+						)
+				);
 	}
 
 	public User registerUser(UserRegistration userRegistration, List<Role> roles) {
