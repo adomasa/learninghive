@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,9 +26,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		//redundant things for jwt token
-		http.cors().disable()
-				.csrf().disable()
+		//todo potential security issue. Node should be defined in cors config
+		http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+				.and()
+				.csrf().disable() //redundant thing for jwt token
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and()
 				.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
