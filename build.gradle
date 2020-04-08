@@ -38,6 +38,8 @@ dependencies {
 	compile group: 'org.passay', name: 'passay', version: '1.5.0'
 	//random string generation
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+	//dto mapper
+	implementation 'org.modelmapper:modelmapper:2.3.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -54,6 +56,7 @@ pmd {
 	ruleSets = []
 	ruleSetConfig = rootProject.resources.text.fromFile('pmd/ruleset.xml')
 	ignoreFailures = false
+	consoleOutput = true
 }
 
 test {

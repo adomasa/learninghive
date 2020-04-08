@@ -47,7 +47,6 @@ under the License.
     <rule ref="category/java/bestpractices.xml/PositionLiteralsFirstInCaseInsensitiveComparisons" />
     <rule ref="category/java/bestpractices.xml/PositionLiteralsFirstInComparisons" />
     <rule ref="category/java/bestpractices.xml/PreserveStackTrace" />
-    <rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
     <rule ref="category/java/bestpractices.xml/UnusedImports" />
     <rule ref="category/java/bestpractices.xml/UnusedLocalVariable" />
     <rule ref="category/java/bestpractices.xml/UnusedPrivateField" />

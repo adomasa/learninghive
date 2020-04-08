@@ -6,6 +6,7 @@ import javax.validation.constraints.NotBlank;
 
 @Value
 public class UserLogin {
+	@NotBlank
 	String email;
 
 	@NotBlank

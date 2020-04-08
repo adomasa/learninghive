@@ -20,6 +20,8 @@ security:
 server:
   port: 8080
   domain:
+  error:
+    include-stacktrace: never
 
 email:
   username:

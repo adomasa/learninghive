@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.domain.UserRefreshToken;
-import distributed.monolith.learninghive.model.exception.UserNotFoundException;
+import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.exception.WrongPasswordException;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserLogin;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -55,20 +54,20 @@ public class AccountService {
 	 * Currently, it doesn't expire. Ideally it should have expiration date
 	 */
 	private String createRefreshToken(User user) {
-		Optional<UserRefreshToken> oldToken = refreshTokenRepository.findByUser(user);
 		String newTokenValue = RandomStringUtils.randomAlphanumeric(128);
+		UserRefreshToken newRefreshToken = refreshTokenRepository
+				.findByUser(user)
+				.map(token -> {
+					token.setToken(newTokenValue);
+					return token;
+				})
+				.orElse(new UserRefreshToken(newTokenValue, user));
 
-		if (oldToken.isPresent()) {
-			oldToken.get().setToken(newTokenValue);
-		} else {
-			refreshTokenRepository.save(new UserRefreshToken(newTokenValue, user));
-		}
+		refreshTokenRepository.save(newRefreshToken);
 
 		return newTokenValue;
 	}
 
-
-	@Transactional
 	public TokenPair loginUser(UserLogin userLogin) {
 		return userRepository.findByEmail(userLogin.getEmail())
 				.map(user -> {
@@ -78,7 +77,7 @@ public class AccountService {
 						throw new WrongPasswordException();
 					}
 				})
-				.orElseThrow(UserNotFoundException::new);
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userLogin.getEmail()));
 	}
 
 	/**
