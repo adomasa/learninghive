@@ -7,13 +7,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ObjectiveRepository extends JpaRepository<Objective, Long>
-{
+public interface ObjectiveRepository extends JpaRepository<Objective, Long> {
 
-    List<Objective> findByUserId(long id);
+	List<Objective> findByUserId(long id);
 
-    List<Objective> findByTopicId(long id);
+	List<Objective> findByTopicId(long id);
 
-    Objective findByUserIdAndTopicId(long userId, long topicId);
+	Objective findByUserIdAndTopicId(long userId, long topicId);
 
 }

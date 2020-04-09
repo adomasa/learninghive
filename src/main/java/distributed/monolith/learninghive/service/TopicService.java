@@ -49,7 +49,7 @@ public class TopicService {
 
 	@Transactional
 	public void delete(Long id) {
-		if(!objectiveRepository.findByTopicId(id).isEmpty()) {
+		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
 			throw new TopicHasObjectivesException();
 		}
 
@@ -60,7 +60,7 @@ public class TopicService {
 		//todo find out what's expected
 		if (topic.getChildren().isEmpty()) {
 			Topic parentTopic = topic.getParent();
-			if(parentTopic != null) {
+			if (parentTopic != null) {
 				parentTopic.getChildren().remove(topic); //todo will it get updated without flagging?
 			}
 			topicRepository.deleteById(id);

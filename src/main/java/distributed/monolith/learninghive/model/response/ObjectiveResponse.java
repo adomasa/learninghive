@@ -9,15 +9,15 @@ import lombok.Data;
 
 @Data
 public class ObjectiveResponse {
-    long id;
+	long id;
 
-    boolean completed;
+	boolean completed;
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    User user;
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+	@JsonIdentityReference(alwaysAsId = true)
+	User user;
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    Topic topic;
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+	@JsonIdentityReference(alwaysAsId = true)
+	Topic topic;
 }

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class TopicHasObjectivesException extends RuntimeException {
 
-    public TopicHasObjectivesException() {
-        super("Topic has objectives");
-    }
+	public TopicHasObjectivesException() {
+		super("Topic has objectives");
+	}
 }

@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,62 +21,62 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ObjectiveService {
 
-    private final ObjectiveRepository objectiveRepository;
-    private final TopicRepository topicRepository;
-    private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
+	private final ObjectiveRepository objectiveRepository;
+	private final TopicRepository topicRepository;
+	private final UserRepository userRepository;
+	private final ModelMapper modelMapper;
 
-    @Transactional
-    public ObjectiveResponse updateObjective(long id, ObjectiveRequest objectiveRequest)
-    {
-        Objective objective = objectiveRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException(Objective.class.getSimpleName(), id));
+	public ObjectiveResponse updateObjective(long id, ObjectiveRequest objectiveRequest) {
+		Objective objective = objectiveRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
 
-        // todo is there any point to allow updating user or topic
-        mountObjectiveEntity(objective, objectiveRequest);
+		// todo is there any point to allow updating user or topic
+		mountObjectiveEntity(objective, objectiveRequest);
 
-        return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
-    }
+		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
+	}
 
-    @Transactional
-    public ObjectiveResponse addObjective(ObjectiveRequest objectiveRequest)
-    {
-        if(objectiveRepository.findByUserIdAndTopicId(objectiveRequest.getUserId(), objectiveRequest.getTopicId()) != null) {
-            throw new DuplicateObjectiveException();
-        }
+	public ObjectiveResponse addObjective(ObjectiveRequest objectiveRequest) {
+		if (objectiveRepository.findByUserIdAndTopicId(
+				objectiveRequest.getUserId(), objectiveRequest.getTopicId()) != null) {
+			throw new DuplicateObjectiveException();
+		}
 
-        Objective objective = new Objective();
-        mountObjectiveEntity(objective, objectiveRequest);
+		Objective objective = new Objective();
+		mountObjectiveEntity(objective, objectiveRequest);
 
-        return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
-    }
+		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
+	}
 
-    @Transactional
-    public void deleteObjective(long id)
-    {
-        // todo don't delete if used in training day
-        objectiveRepository.deleteById(id);
-    }
+	public void deleteObjective(long id) {
+		// todo don't delete if used in training day
+		objectiveRepository.deleteById(id);
+	}
 
-    @Transactional
-    public List<ObjectiveResponse> searchByUserId(long userId)
-    {
-        return objectiveRepository.findByUserId(userId)
-                .parallelStream()
-                .map(t -> modelMapper.map(t, ObjectiveResponse.class))
-                .collect(Collectors.toList());
-    }
+	public List<ObjectiveResponse> queryByUserId(long userId) {
+		return objectiveRepository.findByUserId(userId)
+				.parallelStream()
+				.map(o -> modelMapper.map(o, ObjectiveResponse.class))
+				.collect(Collectors.toList());
+	}
 
-    private void mountObjectiveEntity(Objective destination, ObjectiveRequest source)
-    {
-        destination.setCompleted(source.getCompleted());
+	private void mountObjectiveEntity(Objective destination, ObjectiveRequest source) {
+		destination.setCompleted(source.getCompleted());
 
-        Topic topic = topicRepository.findById(source.getTopicId())
-                .orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), source.getTopicId()));
-        destination.setTopic(topic);
+		Topic topic = topicRepository.findById(source.getTopicId())
+				.orElseThrow(() -> new ResourceNotFoundException(
+								Topic.class.getSimpleName(),
+								source.getTopicId()
+						)
+				);
+		destination.setTopic(topic);
 
-        User user = userRepository.findById(source.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), source.getUserId()));
-        destination.setUser(user);
-    }
+		User user = userRepository.findById(source.getUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(
+								User.class.getSimpleName(),
+								source.getUserId()
+						)
+				);
+		destination.setUser(user);
+	}
 }
