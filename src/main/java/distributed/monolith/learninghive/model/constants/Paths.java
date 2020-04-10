@@ -18,6 +18,12 @@ public final class Paths {
 	public static final String OBJECTIVE_DELETE = "/objective/delete";
 	public static final String OBJECTIVE_UPDATE = "/objective/update";
 
+	public static final String USER_DELETE = "/user/delete";
+	public static final String USER_UPDATE = "/user/update";
+	public static final String USER_CHANGEEMAIL = "/user/update/email";
+	public static final String USER_QUERY = "/user/q";
+	public static final String USER_SUBORDINATE_ADD = "/user/subordinates/add";
+	public static final String USER_SUBORDINATE_DELETE = "/user/subordinates/delete";
 	private Paths() {
 	}
 }
