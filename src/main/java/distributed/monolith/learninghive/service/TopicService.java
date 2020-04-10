@@ -61,7 +61,7 @@ public class TopicService {
 		if (topic.getChildren().isEmpty()) {
 			Topic parentTopic = topic.getParent();
 			if (parentTopic != null) {
-				parentTopic.getChildren().remove(topic); //todo will it get updated without flagging?
+				parentTopic.getChildren().remove(topic);
 			}
 			topicRepository.deleteById(id);
 		} else {
