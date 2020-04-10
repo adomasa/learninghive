@@ -70,7 +70,7 @@ public class AccountController {
 
 	@PostMapping(path = ACCOUNT_INVITE)
 	public @ResponseBody
-	String generateRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
+	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		long userId = securityService.getLoggedUserId();
 		String invitationLink = accountService.createInvitationLink(userInvitation, userId);
 		emailService.sendEmail(userInvitation.getEmail(),"Invitation link", invitationLink);
