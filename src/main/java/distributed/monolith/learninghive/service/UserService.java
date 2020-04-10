@@ -4,7 +4,6 @@ import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateEmailException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
-import distributed.monolith.learninghive.model.exception.TopicHasObjectivesException;
 import distributed.monolith.learninghive.model.exception.UserHasSubordinatesException;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.request.UserRequest;
@@ -13,9 +12,7 @@ import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Service
