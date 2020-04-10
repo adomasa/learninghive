@@ -3,9 +3,11 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.model.exception.DuplicateTitleException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
-import distributed.monolith.learninghive.model.exception.TopicInUseException;
+import distributed.monolith.learninghive.model.exception.TopicHasChildrenException;
+import distributed.monolith.learninghive.model.exception.TopicHasObjectivesException;
 import distributed.monolith.learninghive.model.request.TopicRequest;
 import distributed.monolith.learninghive.model.response.TopicResponse;
+import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TopicService {
 
+	private final ObjectiveRepository objectiveRepository;
 	private final TopicRepository topicRepository;
 	private final ModelMapper modelMapper;
 
@@ -46,15 +49,23 @@ public class TopicService {
 
 	@Transactional
 	public void delete(Long id) {
+		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
+			throw new TopicHasObjectivesException();
+		}
+
 		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+
 		//todo find out what's expected
 		if (topic.getChildren().isEmpty()) {
-			topic.getParent().getChildren().remove(topic); //todo will it get updated without flagging?
+			Topic parentTopic = topic.getParent();
+			if (parentTopic != null) {
+				parentTopic.getChildren().remove(topic);
+			}
 			topicRepository.deleteById(id);
 		} else {
-			throw new TopicInUseException();
+			throw new TopicHasChildrenException();
 		}
 	}
 
