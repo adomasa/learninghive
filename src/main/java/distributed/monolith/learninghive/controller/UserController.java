@@ -20,41 +20,27 @@ public class UserController {
 
 	@DeleteMapping(path = USER_DELETE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteUser(@RequestParam(name = "email") String email){
+	public void deleteUser(@RequestParam(name = "email") String email) {
 		userService.delete(email);
 	}
 
 	@PutMapping(path = USER_UPDATE)
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUser(@RequestParam(name = "email") String email, @Valid @RequestBody UserRequest userRequest){
+	public void updateUser(@RequestParam(name = "email") String email, @Valid @RequestBody UserRequest userRequest) {
 		userService.updateUser(email, userRequest);
-	}
-
-	@PutMapping(path = USER_CHANGEEMAIL)
-	@ResponseStatus(HttpStatus.OK)
-	public void updateUserEmail(@RequestParam(name = "email") String email){
-		userService.updateUserEmail(email);
 	}
 
 	@GetMapping(path = USER_QUERY)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
-	List<User> queryUserSubordinates(@RequestParam (name = "email") String email){
+	List<User> queryUserSubordinates(@RequestParam(name = "email") String email) {
 		return userService.getUserSubordinates(email);
 	}
 
-	@PostMapping(path = USER_SUBORDINATE_ADD)
+	@PostMapping(path = USER_SUPERVISOR)
 	@ResponseStatus(HttpStatus.OK)
-	public void addUserSubordinate(@RequestParam (name = "emailSupervisor") String emailSupervisor,
-	                               @RequestParam (name = "emailSubordinate") String emailSubordinate){
-		userService.addUserSubordinate(emailSupervisor, emailSubordinate);
+	public void updateUserSupervisor(@RequestParam(name = "emailSupervisor") String emailSupervisor,
+	                                 @RequestParam(name = "emailSubordinate") String emailSubordinate) {
+		userService.updateUserSupervisor(emailSupervisor, emailSubordinate);
 	}
-
-	@DeleteMapping(path = USER_SUBORDINATE_DELETE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteUserSubordinate(@RequestParam (name = "emailSupervisor") String emailSupervisor,
-	                                  @RequestParam (name = "emailSubordinate") String emailSubordinate){
-		userService.deleteUserSubordinate(emailSupervisor, emailSubordinate);
-	}
-
 }

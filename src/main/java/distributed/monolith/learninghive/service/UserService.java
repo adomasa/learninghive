@@ -23,15 +23,17 @@ public class UserService {
 
 	public void delete(String email) {
 
-		if (userRepository.findByEmail(email).isPresent()) {
-			if(userRepository.findByEmail(email).get().getSubordinates().isEmpty()){
-				userRepository.deleteByEmail(email);
-			}
-			else throw new UserHasSubordinatesException();
+		var user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email
+				));
+
+		if (user.getSubordinates().isEmpty()) {
+			userRepository.deleteByEmail(email);
+		} else {
+			throw new UserHasSubordinatesException();
 		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				email);
 
 	}
 
@@ -66,65 +68,48 @@ public class UserService {
 				.orElseThrow(IllegalStateException::new);
 	}
 
-	public void updateUser(String email, UserRequest userRequest){
-		if(userRepository.findByEmail(email).isPresent()){
-			var userToUpdate = userRepository.findByEmail(email).get();
-			userToUpdate.setEmail(userRequest.getEmail());
-			userToUpdate.setName(userRequest.getName());
-			userToUpdate.setSurname(userRequest.getSurname());
-			userToUpdate.setPassword(userRequest.getPassword());
-		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				email
-		);
+	public void updateUser(String email, UserRequest userRequest) {
+
+		var userToUpdate = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email
+				));
+
+		userToUpdate.setEmail(userRequest.getEmail());
+		userToUpdate.setName(userRequest.getName());
+		userToUpdate.setSurname(userRequest.getSurname());
+		userToUpdate.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+
+		userRepository.save(userToUpdate);
 	}
 
-	public void updateUserEmail(String email) {
-		if(userRepository.findByEmail(email).isPresent()){
-			userRepository.findByEmail(email).get().setEmail(email);
-		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				email
-		);
-	}
 
 	public List<User> getUserSubordinates(String email) {
-		if(userRepository.findByEmail(email).isPresent()){
-			return userRepository.findByEmail(email).get().getSubordinates();
-		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				email
-		);
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email
+				))
+				.getSubordinates();
 	}
 
-	public void addUserSubordinate(String emailSupervisor, String emailSubordinate) {
-		if(userRepository.findByEmail(emailSupervisor).isPresent()
-				&& userRepository.findByEmail(emailSubordinate).isPresent()){
-			userRepository.findByEmail(emailSupervisor)
-					.get()
-					.getSubordinates()
-					.add(userRepository.findByEmail(emailSubordinate).get());
-		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				emailSupervisor + " " + emailSubordinate
-		);
-	}
+	public void updateUserSupervisor(String emailSupervisor, String emailSubordinate) {
+		var userSupervisor = userRepository.findByEmail(emailSupervisor)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						emailSupervisor
+				));
 
-	public void deleteUserSubordinate(String emailSupervisor, String emailSubordinate) {
-		if(userRepository.findByEmail(emailSupervisor).isPresent()
-				&& userRepository.findByEmail(emailSubordinate).isPresent()){
-			userRepository.findByEmail(emailSupervisor)
-					.get()
-					.getSubordinates()
-					.remove(userRepository.findByEmail(emailSubordinate).get());
-		}
-		else throw new ResourceNotFoundException(
-				User.class.getSimpleName(),
-				emailSupervisor + " " + emailSubordinate
-		);
+		var userSubordinate = userRepository.findByEmail(emailSubordinate)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						emailSubordinate
+				));
+
+		userSubordinate.setSupervisor(userSupervisor);
+		userSupervisor.getSubordinates().add(userSubordinate);
+		userRepository.save(userSubordinate);
+		userRepository.save(userSupervisor);
 	}
 }
