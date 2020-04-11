@@ -34,6 +34,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		corsConfiguration.addAllowedMethod("OPTIONS");
 		corsConfiguration.addAllowedMethod("PUT");
 		corsConfiguration.addAllowedMethod("DELETE");
+		corsConfiguration.addExposedHeader("Access-Control-Allow-Origin");
 		source.registerCorsConfiguration("/**", corsConfiguration);
 		return source;
 	}
