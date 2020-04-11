@@ -4,7 +4,10 @@ import distributed.monolith.learninghive.domain.Invitation;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface LinkRepository extends CrudRepository<Invitation, Long> {
+import java.util.Optional;
 
+@Repository
+public interface InvitationRepository extends CrudRepository<Invitation, Long> {
+
+	Optional<Invitation> findByValidationToken(String validationToken);
 }
