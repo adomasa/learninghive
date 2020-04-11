@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class TopicHasObjectivesException extends RuntimeException {
 
+	private static final long serialVersionUID = 4490082550406396641L;
+
 	public TopicHasObjectivesException() {
 		super("Topic has objectives");
 	}

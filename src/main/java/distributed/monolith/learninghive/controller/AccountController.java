@@ -33,8 +33,9 @@ public class AccountController {
 	@PostMapping(path = ACCOUNT_REGISTER)
 	@ResponseStatus(HttpStatus.CREATED)
 	public @ResponseBody
-	TokenPair registerUser(@Valid @RequestBody UserRegistration userRegistration) {
-		User user = userService.registerUser(userRegistration, Collections.singletonList(Role.CLIENT));
+	TokenPair registerUser(@RequestParam("token") String invitationToken,
+	                       @Valid @RequestBody UserRegistration userRegistration) {
+		User user = userService.registerUser(invitationToken, userRegistration, Collections.singletonList(Role.CLIENT));
 		return accountService.doLoginUser(user);
 	}
 
@@ -72,8 +73,8 @@ public class AccountController {
 	public @ResponseBody
 	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		long userId = securityService.getLoggedUserId();
-		String invitationLink = accountService.createInvitationLink(userInvitation, userId);
-		emailService.sendEmail(userInvitation.getEmail(),"Invitation link", invitationLink);
+		String invitationLink = userService.createInvitationLink(userInvitation, userId);
+		emailService.sendEmail(userInvitation.getEmail(), "Invitation link", invitationLink);
 		return invitationLink;
 	}
 }

@@ -1,12 +1,13 @@
 package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Role;
-import distributed.monolith.learninghive.model.request.UserRegistration;
+import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -17,8 +18,8 @@ import java.util.Arrays;
 public class AdminService {
 	private static final Logger LOG = LoggerFactory.getLogger(AdminService.class);
 
-	private final UserService userService;
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Value("${admin.username:admin}")
 	private String defaultUsername;
@@ -29,15 +30,23 @@ public class AdminService {
 	@PostConstruct
 	public void initialiseAdminUser() {
 		if (userRepository.findByRoles(Role.ADMIN).isEmpty()) {
-			LOG.info("Initialising admin user");
-			UserRegistration admin = new UserRegistration(
-					defaultUsername,
-					defaultPassword,
-					"admin",
-					"admin"
-			);
+			if (!userRepository.findByRoles(Role.CLIENT).isEmpty()) {
+				throw new IllegalStateException("Admin can be created only on empty DB");
+			}
 
-			userService.registerUser(admin, Arrays.asList(Role.ADMIN, Role.CLIENT));
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Initialising admin user");
+			}
+
+			User admin = User.builder()
+					.email(defaultUsername)
+					.password(passwordEncoder.encode(defaultPassword))
+					.name("admin")
+					.surname("admin")
+					.roles(Arrays.asList(Role.ADMIN, Role.CLIENT))
+					.build();
+
+			userRepository.save(admin);
 		}
 	}
 
