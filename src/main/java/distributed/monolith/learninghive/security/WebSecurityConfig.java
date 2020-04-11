@@ -48,9 +48,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 				.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
-//				.antMatchers(Paths.ACCOUNT_LOGIN).permitAll()
-//				.antMatchers(Paths.ACCOUNT_REGISTER).permitAll()
-//				.antMatchers(Paths.ACCOUNT_REFRESH).permitAll()
+				.antMatchers(Paths.ACCOUNT_LOGIN).permitAll()
+				.antMatchers(Paths.ACCOUNT_REGISTER).permitAll()
+				.antMatchers(Paths.ACCOUNT_REFRESH).permitAll()
 				.anyRequest().authenticated()
 				.and()
 				.exceptionHandling()
@@ -59,16 +59,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 					response.setHeader("WWW-Authenticate", "Bearer");
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 				});
-	}
-
-	@Override
-	public void configure(WebSecurity web) {
-		// todo temporary workaround since jwt security filter  goes on all requests despite config
-		web.ignoring().antMatchers(
-				Paths.ACCOUNT_LOGIN,
-				Paths.ACCOUNT_REGISTER,
-				Paths.ACCOUNT_REFRESH
-		);
 	}
 
 	@Bean
