@@ -14,6 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,10 +26,21 @@ import javax.servlet.http.HttpServletResponse;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final JwtTokenProvider jwtTokenProvider;
 
+	//todo potential security issue. Node should be defined in cors config
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+		corsConfiguration.addAllowedMethod("OPTIONS");
+		corsConfiguration.addAllowedMethod("PUT");
+		corsConfiguration.addAllowedMethod("DELETE");
+		source.registerCorsConfiguration("/**", corsConfiguration);
+		return source;
+	}
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		//todo potential security issue. Node should be defined in cors config
-		http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+		http.cors()
 				.and()
 				.csrf().disable() //redundant thing for jwt token
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
