@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Objective;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.exception.DuplicateObjectiveException;
+import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
@@ -11,8 +11,8 @@ import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +39,9 @@ public class ObjectiveService {
 	public ObjectiveResponse addObjective(ObjectiveRequest objectiveRequest) {
 		if (objectiveRepository.findByUserIdAndTopicId(
 				objectiveRequest.getUserId(), objectiveRequest.getTopicId()) != null) {
-			throw new DuplicateObjectiveException();
+			throw new DuplicateResourceException(Objective.class.getSimpleName(),
+					"user and topic ids",
+					objectiveRequest.getUserId() + " and " + objectiveRequest.getTopicId());
 		}
 
 		Objective objective = new Objective();

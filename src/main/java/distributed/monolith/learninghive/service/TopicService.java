@@ -1,7 +1,7 @@
 package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Topic;
-import distributed.monolith.learninghive.model.exception.DuplicateTitleException;
+import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.exception.TopicHasChildrenException;
 import distributed.monolith.learninghive.model.exception.TopicHasObjectivesException;
@@ -28,7 +28,7 @@ public class TopicService {
 	@Transactional
 	public TopicResponse createTopic(TopicRequest topicRequest) {
 		if (topicRepository.findByTitle(topicRequest.getTitle()).isPresent()) {
-			throw new DuplicateTitleException();
+			throw new DuplicateResourceException(Topic.class.getSimpleName(), "title", topicRequest.getTitle());
 		}
 
 		var topic = new Topic();

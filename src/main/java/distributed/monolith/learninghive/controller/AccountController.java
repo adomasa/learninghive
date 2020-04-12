@@ -2,7 +2,7 @@ package distributed.monolith.learninghive.controller;
 
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.exception.InvalidRefreshTokenException;
+import distributed.monolith.learninghive.model.exception.InvalidTokenException;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.request.UserRegistration;
@@ -44,7 +44,7 @@ public class AccountController {
 	public @ResponseBody
 	TokenPair tokenRefresh(@RequestParam("token") String refreshToken) {
 		return accountService.refreshAccessTokens(refreshToken)
-				.orElseThrow(InvalidRefreshTokenException::new);
+				.orElseThrow(() -> new InvalidTokenException("refresh", refreshToken));
 	}
 
 	@PostMapping(path = ACCOUNT_LOGIN)

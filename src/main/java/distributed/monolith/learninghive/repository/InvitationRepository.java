@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface InvitationRepository extends CrudRepository<Invitation, Long> {
 
 	Optional<Invitation> findByValidationToken(String validationToken);
+
+	Optional<Invitation> findByEmail(String validationToken);
 }
