@@ -2,7 +2,7 @@ package distributed.monolith.learninghive.controller;
 
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.exception.InvalidRefreshTokenException;
+import distributed.monolith.learninghive.model.exception.InvalidTokenException;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.request.UserRegistration;
@@ -33,8 +33,9 @@ public class AccountController {
 	@PostMapping(path = ACCOUNT_REGISTER)
 	@ResponseStatus(HttpStatus.CREATED)
 	public @ResponseBody
-	TokenPair registerUser(@Valid @RequestBody UserRegistration userRegistration) {
-		User user = userService.registerUser(userRegistration, Collections.singletonList(Role.CLIENT));
+	TokenPair registerUser(@RequestParam("token") String invitationToken,
+	                       @Valid @RequestBody UserRegistration userRegistration) {
+		User user = userService.registerUser(invitationToken, userRegistration, Collections.singletonList(Role.CLIENT));
 		return accountService.doLoginUser(user);
 	}
 
@@ -43,7 +44,7 @@ public class AccountController {
 	public @ResponseBody
 	TokenPair tokenRefresh(@RequestParam("token") String refreshToken) {
 		return accountService.refreshAccessTokens(refreshToken)
-				.orElseThrow(InvalidRefreshTokenException::new);
+				.orElseThrow(() -> new InvalidTokenException("refresh", refreshToken));
 	}
 
 	@PostMapping(path = ACCOUNT_LOGIN)
@@ -72,8 +73,8 @@ public class AccountController {
 	public @ResponseBody
 	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		long userId = securityService.getLoggedUserId();
-		String invitationLink = accountService.createInvitationLink(userInvitation, userId);
-		emailService.sendEmail(userInvitation.getEmail(),"Invitation link", invitationLink);
+		String invitationLink = userService.createInvitationLink(userInvitation, userId);
+		emailService.sendEmail(userInvitation.getEmail(), "Invitation link", invitationLink);
 		return invitationLink;
 	}
 }

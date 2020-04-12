@@ -1,7 +1,10 @@
 package distributed.monolith.learninghive.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
@@ -11,8 +14,8 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
-@RequiredArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuperBuilder
+@NoArgsConstructor
 public class User {
 
 	@Id
@@ -20,26 +23,21 @@ public class User {
 	private long id;
 
 	@Column(nullable = false, unique = true)
-	@NonNull
 	@Length(max = 254, message = "Email is too long")
 	private String email;
 
 	@JsonIgnore
 	@Column(nullable = false)
 	@Length(max = 254, message = "Password is too long")
-	@NonNull
 	private String password;
 
 	@Column(nullable = false)
-	@NonNull
 	private String name;
 
 	@Column(nullable = false)
-	@NonNull
 	private String surname;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@NonNull
 	private List<Role> roles;
 
 	@ManyToOne
