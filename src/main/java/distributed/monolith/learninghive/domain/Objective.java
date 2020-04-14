@@ -8,6 +8,7 @@ import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @OptimisticLocking(type = OptimisticLockType.VERSION)
@@ -26,6 +27,9 @@ public class Objective {
 	@ManyToOne
 	@JoinColumn(name = "topic_id")
 	private Topic topic;
+
+	@ManyToMany(mappedBy = "objectives")
+	List<TrainingDay> trainingDays;
 
 	@Column(nullable = false)
 	private Boolean completed;
