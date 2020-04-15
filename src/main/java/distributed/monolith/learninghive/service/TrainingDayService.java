@@ -104,23 +104,21 @@ public class TrainingDayService {
 		destination.setUser(user);
 
 		destination.setObjectives(new ArrayList());
-		List<Long> sourceObjectiveIds = source.getObjectiveIds()
+			source.getObjectiveIds()
 				.stream()
 				.distinct()
-				.collect(Collectors.toList());
-
-		for (Long objectiveId : sourceObjectiveIds) {
-			Objective objective = objectiveRepository
-					.findById(objectiveId)
-					.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(),
-							objectiveId));
-
-			if (user.getId() != objective.getUser().getId()) {
-				throw new ResourceDoesNotBelongToUser(Objective.class.getSimpleName(), objectiveId,
-						user.getId());
-			}
-
-			destination.getObjectives().add(objective);
+				.map(id -> objectiveRepository
+						.findById(id)
+						.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id)))
+				.forEach(objective -> { 
+					if (user.getId() != objective.getUser().getId()) {
+						throw new ResourceDoesNotBelongToUser(
+								Objective.class.getSimpleName(), 
+								objective.getId(),
+								user.getId());
+					}
+					destination.getObjectives().add(objective);
+				});
 		}
 	}
 }
