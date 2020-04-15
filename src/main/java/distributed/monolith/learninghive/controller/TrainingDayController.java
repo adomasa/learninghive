@@ -20,8 +20,8 @@ public class TrainingDayController {
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = TRAINING_DAY_QUERY)
 	public @ResponseBody
-	List<TrainingDayResponse> queryTrainingDay(@RequestParam(name = "userId") Long userId) {
-		return trainingDayService.queryTrainingDay(userId);
+	List<TrainingDayResponse> queryTrainingDays(@RequestParam(name = "userId") Long userId) {
+		return trainingDayService.queryTrainingDays(userId);
 	}
 
 	@ResponseStatus(HttpStatus.OK)

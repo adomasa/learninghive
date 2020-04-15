@@ -20,7 +20,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +35,7 @@ public class TrainingDayService {
 	public TrainingDayResponse addTrainingDay(TrainingDayRequest trainingDayRequest) {
 		throwIfDuplicate(trainingDayRequest, -1l);
 
+		// todo don't allow adding training day in the past
 		TrainingDay trainingDay = new TrainingDay();
 		mountTrainingDay(trainingDay, trainingDayRequest);
 
@@ -50,16 +50,16 @@ public class TrainingDayService {
 
 		throwIfDuplicate(trainingDayRequest, id);
 
-		// todo should you be able to edit past training day?
-		if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
-			throw new ChangingPastTrainingDayException();
-		}
+		// todo should only be able to edit description
+		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
+		//	throw new ChangingPastTrainingDayException();
+		//}
 
 		mountTrainingDay(trainingDay, trainingDayRequest);
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
 	}
 
-	public List<TrainingDayResponse> queryTrainingDay(long userId) {
+	public List<TrainingDayResponse> queryTrainingDays(long userId) {
 		return trainingDayRepository.findByUserId(userId)
 				.parallelStream()
 				.map(t -> modelMapper.map(t, TrainingDayResponse.class))
@@ -80,16 +80,14 @@ public class TrainingDayService {
 	}
 
 	private void throwIfDuplicate(TrainingDayRequest request, Long id) {
-		Optional<TrainingDay> trainingDay =
-				trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(),
-						request.getUserId());
-
-		trainingDay.ifPresent(t -> {
-			if (t.getId() != id) {
-				throw new DuplicateResourceException(TrainingDay.class.getSimpleName(), "userId and " +
-						"scheduledDay", request.getUserId() + " and " + request.getScheduledDay());
-			}
-		});
+		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
+				.ifPresent(t -> {
+					if (t.getId() != id) {
+						throw new DuplicateResourceException(TrainingDay.class.getSimpleName(),
+								"userId and " + "scheduledDay",
+								request.getUserId() + " and " + request.getScheduledDay());
+					}
+				});
 	}
 
 	@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
@@ -104,21 +102,20 @@ public class TrainingDayService {
 		destination.setUser(user);
 
 		destination.setObjectives(new ArrayList());
-			source.getObjectiveIds()
+		source.getObjectiveIds()
 				.stream()
 				.distinct()
 				.map(id -> objectiveRepository
 						.findById(id)
 						.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id)))
-				.forEach(objective -> { 
+				.forEach(objective -> {
 					if (user.getId() != objective.getUser().getId()) {
 						throw new ResourceDoesNotBelongToUser(
-								Objective.class.getSimpleName(), 
+								Objective.class.getSimpleName(),
 								objective.getId(),
 								user.getId());
 					}
 					destination.getObjectives().add(objective);
 				});
-		}
 	}
 }
