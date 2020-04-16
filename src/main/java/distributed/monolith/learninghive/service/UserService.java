@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -94,6 +95,7 @@ public class UserService {
 				.getSubordinates();
 	}
 
+	@Transactional
 	public void updateUserSupervisor(String emailSupervisor, String emailSubordinate) {
 		var userSupervisor = userRepository.findByEmail(emailSupervisor)
 				.orElseThrow(() -> new ResourceNotFoundException(
@@ -107,8 +109,11 @@ public class UserService {
 						emailSubordinate
 				));
 
+		userSubordinate.getSupervisor().getSubordinates().remove(userSubordinate);
 		userSubordinate.setSupervisor(userSupervisor);
-		userSupervisor.getSubordinates().add(userSubordinate);
+		if (!userSupervisor.getSubordinates().contains(userSubordinate)) {
+			userSupervisor.getSubordinates().add(userSubordinate);
+		}
 		userRepository.save(userSubordinate);
 		userRepository.save(userSupervisor);
 	}
