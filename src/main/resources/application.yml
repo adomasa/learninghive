@@ -18,10 +18,12 @@ security:
       expireLength: 900000 # 15 minutes
 
 server:
-  port: 8080
-  domain:
   error:
     include-stacktrace: never
+
+website:
+  url: "localhost:3001"
+  registrationPath: "/signup"
 
 email:
   username:
