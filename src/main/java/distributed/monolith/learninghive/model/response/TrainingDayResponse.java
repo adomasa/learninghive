@@ -12,7 +12,7 @@ import java.util.List;
 
 @Data
 public class TrainingDayResponse {
-	long id;
+	Long id;
 	String description;
 	Date scheduledDate;
 

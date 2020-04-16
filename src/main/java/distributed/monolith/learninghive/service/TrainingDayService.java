@@ -33,6 +33,7 @@ public class TrainingDayService {
 
 	@Transactional
 	public TrainingDayResponse addTrainingDay(TrainingDayRequest trainingDayRequest) {
+		// second parameter is only important when updating existing entity
 		throwIfDuplicate(trainingDayRequest, -1l);
 
 		// todo don't allow adding training day in the past
