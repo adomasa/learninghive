@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.controller;
 
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
+import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.ObjectiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,18 +17,20 @@ import static distributed.monolith.learninghive.model.constants.Paths.*;
 @RequiredArgsConstructor
 public class ObjectiveController {
 	private final ObjectiveService objectiveService;
+	private final SecurityService securityService;
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = OBJECTIVE_QUERY)
 	public @ResponseBody
-	List<ObjectiveResponse> queryUserObjectives(@RequestParam(name = "userId") Long userId) {
-		return objectiveService.queryByUserId(userId);
+	List<ObjectiveResponse> queryUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
+		return objectiveService.queryByUserId(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = OBJECTIVE_ADD)
 	public @ResponseBody
 	ObjectiveResponse addObjective(@Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		setUserId(objectiveRequest);
 		return objectiveService.addObjective(objectiveRequest);
 	}
 
@@ -35,6 +38,7 @@ public class ObjectiveController {
 	@PutMapping(path = OBJECTIVE_UPDATE)
 	public ObjectiveResponse updateObjective(@RequestParam(name = "id") Long id,
 	                                         @Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		setUserId(objectiveRequest);
 		return objectiveService.updateObjective(id, objectiveRequest);
 	}
 
@@ -42,5 +46,11 @@ public class ObjectiveController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteObjective(@RequestParam(name = "id") Long id) {
 		objectiveService.deleteObjective(id);
+	}
+
+	private void setUserId(ObjectiveRequest request) {
+		if(request.getUserId() == null) {
+			request.setUserId(securityService.getLoggedUserId());
+		}
 	}
 }

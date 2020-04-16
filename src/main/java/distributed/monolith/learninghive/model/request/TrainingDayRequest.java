@@ -1,15 +1,14 @@
 package distributed.monolith.learninghive.model.request;
 
-import lombok.Value;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Date;
 import java.util.List;
 
-@Value
+@Data
 public class TrainingDayRequest {
-	@NotNull
 	Long userId;
 
 	// todo should maximum amount of topics be configurable?
