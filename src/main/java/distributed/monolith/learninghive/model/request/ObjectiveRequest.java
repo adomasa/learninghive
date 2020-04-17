@@ -1,12 +1,11 @@
 package distributed.monolith.learninghive.model.request;
 
-import lombok.Value;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
-@Value
+@Data
 public class ObjectiveRequest {
-	@NotNull
 	Long userId;
 
 	@NotNull

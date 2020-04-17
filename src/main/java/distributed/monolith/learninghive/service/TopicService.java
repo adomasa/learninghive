@@ -2,9 +2,8 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
+import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
-import distributed.monolith.learninghive.model.exception.TopicHasChildrenException;
-import distributed.monolith.learninghive.model.exception.TopicHasObjectivesException;
 import distributed.monolith.learninghive.model.request.TopicRequest;
 import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
@@ -50,7 +49,7 @@ public class TopicService {
 	@Transactional
 	public void delete(Long id) {
 		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
-			throw new TopicHasObjectivesException();
+			throw new ResourceInUseException(Topic.class.getSimpleName(), id, Topic.class.getSimpleName());
 		}
 
 		var topic = topicRepository
@@ -65,7 +64,7 @@ public class TopicService {
 			}
 			topicRepository.deleteById(id);
 		} else {
-			throw new TopicHasChildrenException();
+			throw new ResourceInUseException(Topic.class.getSimpleName(), id, Topic.class.getSimpleName());
 		}
 	}
 
