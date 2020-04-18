@@ -2,8 +2,10 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Objective;
 import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
+import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
@@ -51,8 +53,16 @@ public class ObjectiveService {
 	}
 
 	public void deleteObjective(long id) {
-		// todo don't delete if used in training day
-		objectiveRepository.deleteById(id);
+		Objective objective = objectiveRepository
+				.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
+
+		if (!objective.getTrainingDays().isEmpty()) {
+			throw new ResourceInUseException(Objective.class.getSimpleName(), id,
+					TrainingDay.class.getSimpleName());
+		}
+
+		objectiveRepository.delete(objective);
 	}
 
 	public List<ObjectiveResponse> queryByUserId(long userId) {
