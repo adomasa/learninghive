@@ -6,8 +6,10 @@ import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.InvalidTokenException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
+import distributed.monolith.learninghive.model.exception.UserHasSubordinatesException;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserRegistration;
+import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.repository.InvitationRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
@@ -37,11 +39,19 @@ public class UserService {
 	private String registrationPath;
 
 	public void delete(String email) {
-		userRepository.deleteByEmail(email)
+
+		var user = userRepository.findByEmail(email)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class.getSimpleName(),
-						email)
-				);
+						email
+				));
+
+		if (user.getSubordinates().isEmpty()) {
+			userRepository.deleteByEmail(email);
+		} else {
+			throw new UserHasSubordinatesException();
+		}
+
 	}
 
 	@Transactional
@@ -99,4 +109,52 @@ public class UserService {
 				.orElseThrow(IllegalStateException::new);
 	}
 
+	public void updateUser(String email, UserRequest userRequest) {
+
+		var userToUpdate = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email
+				));
+
+		userToUpdate.setEmail(userRequest.getEmail());
+		userToUpdate.setName(userRequest.getName());
+		userToUpdate.setSurname(userRequest.getSurname());
+		userToUpdate.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+
+		userRepository.save(userToUpdate);
+	}
+
+
+	public List<User> getUserSubordinates(String email) {
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						email
+				))
+				.getSubordinates();
+	}
+
+	@Transactional
+	public void updateUserSupervisor(String emailSupervisor, String emailSubordinate) {
+		var userSupervisor = userRepository.findByEmail(emailSupervisor)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						emailSupervisor
+				));
+
+		var userSubordinate = userRepository.findByEmail(emailSubordinate)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						emailSubordinate
+				));
+
+		userSubordinate.getSupervisor().getSubordinates().remove(userSubordinate);
+		userSubordinate.setSupervisor(userSupervisor);
+		if (!userSupervisor.getSubordinates().contains(userSubordinate)) {
+			userSupervisor.getSubordinates().add(userSubordinate);
+		}
+		userRepository.save(userSubordinate);
+		userRepository.save(userSupervisor);
+	}
 }
