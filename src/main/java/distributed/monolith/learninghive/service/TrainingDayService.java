@@ -12,8 +12,8 @@ import distributed.monolith.learninghive.model.response.TrainingDayResponse;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
-import org.modelmapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -34,29 +34,29 @@ public class TrainingDayService {
 	@Transactional
 	public TrainingDayResponse addTrainingDay(TrainingDayRequest trainingDayRequest) {
 		// second parameter is only important when updating existing entity
-		throwIfDuplicate(trainingDayRequest, -1l);
+		throwIfDuplicate(trainingDayRequest, -1L);
 
 		// todo don't allow adding training day in the past
 		TrainingDay trainingDay = new TrainingDay();
-		mountTrainingDay(trainingDay, trainingDayRequest);
+		mountEntity(trainingDay, trainingDayRequest);
 
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
 	}
 
 	@Transactional
-	public TrainingDayResponse updateTrainingDay(long id, TrainingDayRequest trainingDayRequest) {
+	public TrainingDayResponse updateTrainingDay(long trainingDayId, TrainingDayRequest trainingDayRequest) {
 		TrainingDay trainingDay = trainingDayRepository
-				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class.getSimpleName(), id));
+				.findById(trainingDayId)
+				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class.getSimpleName(), trainingDayId));
 
-		throwIfDuplicate(trainingDayRequest, id);
+		throwIfDuplicate(trainingDayRequest, trainingDayId);
 
 		// todo should only be able to edit description
 		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
 		//	throw new ChangingPastTrainingDayException();
 		//}
 
-		mountTrainingDay(trainingDay, trainingDayRequest);
+		mountEntity(trainingDay, trainingDayRequest);
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
 	}
 
@@ -82,8 +82,8 @@ public class TrainingDayService {
 
 	private void throwIfDuplicate(TrainingDayRequest request, Long id) {
 		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
-				.ifPresent(t -> {
-					if (t.getId() != id) {
+				.ifPresent(trainingDay -> {
+					if (trainingDay.getId() != id) {
 						throw new DuplicateResourceException(TrainingDay.class.getSimpleName(),
 								"userId and " + "scheduledDay",
 								request.getUserId() + " and " + request.getScheduledDay());
@@ -91,8 +91,8 @@ public class TrainingDayService {
 				});
 	}
 
-	@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-	private void mountTrainingDay(TrainingDay destination, TrainingDayRequest source) {
+	private void mountEntity(TrainingDay destination, TrainingDayRequest source) {
+		destination.setTitle(source.getTitle());
 		destination.setDescription(source.getDescription());
 		destination.setScheduledDay(source.getScheduledDay());
 
@@ -102,7 +102,7 @@ public class TrainingDayService {
 						source.getUserId()));
 		destination.setUser(user);
 
-		destination.setObjectives(new ArrayList());
+		destination.setObjectives(new ArrayList<>());
 		source.getObjectiveIds()
 				.stream()
 				.distinct()

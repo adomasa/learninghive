@@ -37,5 +37,8 @@ public class TrainingDay {
 	@Column(nullable = false, name = "scheduled_day")
 	private java.sql.Date scheduledDay;
 
+	@Column(nullable = false, unique = true)
+	private String title;
+
 	private String description;
 }
