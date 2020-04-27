@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.model.exception.CircularReferenceException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
@@ -32,8 +33,13 @@ public class TopicService {
 
 		var topic = new Topic();
 		mountTopicEntity(topic, topicRequest);
+		topic = topicRepository.saveAndFlush(topic);
 
-		return modelMapper.map(topicRepository.save(topic), TopicResponse.class);
+		if (topicRepository.circularReferencesExist(topic.getId())) {
+			throw new CircularReferenceException(Topic.class.getSimpleName());
+		}
+
+		return modelMapper.map(topic, TopicResponse.class);
 	}
 
 	@Transactional
@@ -42,8 +48,13 @@ public class TopicService {
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
 		mountTopicEntity(topic, topicRequest);
+		topic = topicRepository.saveAndFlush(topic);
 
-		return modelMapper.map(topicRepository.save(topic), TopicResponse.class);
+		if (topicRepository.circularReferencesExist(topic.getId())) {
+			throw new CircularReferenceException(Topic.class.getSimpleName());
+		}
+
+		return modelMapper.map(topic, TopicResponse.class);
 	}
 
 	@Transactional
