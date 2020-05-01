@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements AuthTokenProvider {
 	private static final Logger LOG = LoggerFactory.getLogger(JwtTokenProvider.class);
 	private static final String CLAIM_ROLE = "role";
 
@@ -27,6 +27,7 @@ public class JwtTokenProvider {
 	@Value("${security.jwt.token.expireLength:900000}")
 	private long validityInMilliseconds;
 
+	@Override
 	public String createToken(Long userId, List<Role> roles) {
 		Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
 		claims.put(CLAIM_ROLE,
@@ -45,6 +46,7 @@ public class JwtTokenProvider {
 				.compact();
 	}
 
+	@Override
 	public Long getUserId(String token) {
 		String userId = Jwts.parser()
 				.setSigningKey(secret)
@@ -55,6 +57,7 @@ public class JwtTokenProvider {
 		return Long.valueOf(userId);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Collection<SimpleGrantedAuthority> getAuthorities(String token) {
 		return (Collection<SimpleGrantedAuthority>) Jwts.parser()
@@ -64,10 +67,11 @@ public class JwtTokenProvider {
 				.get(CLAIM_ROLE);
 	}
 
+	@Override
 	public Optional<Authentication> getAuthentication(String token) {
 		try {
-			Long userId = getUserId(token);
-			Collection<SimpleGrantedAuthority> userAuthorities = getAuthorities(token);
+			var userId = getUserId(token);
+			var userAuthorities = getAuthorities(token);
 			return Optional.of(new JwtAuthentication(userId, userAuthorities));
 		} catch (ExpiredJwtException e) {
 			LOG.debug("Received expired token: {}", e.getMessage());
