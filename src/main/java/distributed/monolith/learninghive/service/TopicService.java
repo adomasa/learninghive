@@ -1,7 +1,7 @@
 package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Topic;
-import distributed.monolith.learninghive.model.exception.CircularReferenceException;
+import distributed.monolith.learninghive.model.exception.CircularHierarchyException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
@@ -35,8 +35,8 @@ public class TopicService {
 		mountTopicEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
-		if (topicRepository.circularReferencesExist(topic.getId())) {
-			throw new CircularReferenceException(Topic.class.getSimpleName());
+		if (topicRepository.isCircularHierarchy(topic.getId())) {
+			throw new CircularHierarchyException(Topic.class.getSimpleName());
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);
@@ -50,8 +50,8 @@ public class TopicService {
 		mountTopicEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
-		if (topicRepository.circularReferencesExist(topic.getId())) {
-			throw new CircularReferenceException(Topic.class.getSimpleName());
+		if (topicRepository.isCircularHierarchy(topic.getId())) {
+			throw new CircularHierarchyException(Topic.class.getSimpleName(), topic.getId());
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);

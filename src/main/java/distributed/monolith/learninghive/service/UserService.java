@@ -154,8 +154,8 @@ public class UserService {
 		userRepository.save(userSubordinate);
 		userRepository.save(userSupervisor);
 
-		if (userRepository.circularReferencesExist(userSupervisor.getId())) {
-			throw new CircularReferenceException(User.class.getSimpleName());
+		if (userRepository.isCircularHierarchy(userSupervisor.getId())) {
+			throw new CircularHierarchyException(User.class.getSimpleName(), userSupervisor.getId());
 		}
 	}
 }

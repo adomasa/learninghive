@@ -25,5 +25,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
 			"        select u.* from users u join cte on cte.supervisor_id = u.id and u.id <> ?1)" +
 			"     SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END from cte where supervisor_id = ?1",
 			nativeQuery = true)
-	Boolean circularReferencesExist(Long id);
+	Boolean isCircularHierarchy(Long id);
 }
