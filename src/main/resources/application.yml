@@ -21,8 +21,11 @@ server:
   error:
     include-stacktrace: never
 
-website:
+frontend:
+  scheme: "http"
   url: "localhost:3001"
+  ip: "localhost"
+  port: "3001"
   registrationPath: "/signup"
 
 email:
