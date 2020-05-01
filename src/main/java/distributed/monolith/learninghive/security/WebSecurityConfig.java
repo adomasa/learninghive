@@ -27,8 +27,8 @@ import java.util.Collections;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final AuthTokenProvider authTokenProvider;
 
-	@Value("${frontend.ip}:${frontend.port}")
-	private String fullFrontendIp;
+	@Value("${frontend.scheme}://${frontend.ip}:${frontend.port}")
+	private String fullFrontendUrl;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -56,7 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	CorsConfigurationSource corsConfigurationSource() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
-		corsConfiguration.setAllowedOrigins(Collections.singletonList(fullFrontendIp));
+		corsConfiguration.setAllowedOrigins(Collections.singletonList(fullFrontendUrl));
 		corsConfiguration.addAllowedMethod("OPTIONS");
 		corsConfiguration.addAllowedMethod("PUT");
 		corsConfiguration.addAllowedMethod("DELETE");
