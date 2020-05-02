@@ -23,7 +23,7 @@ public class ObjectiveController {
 	@GetMapping(path = OBJECTIVE_QUERY)
 	public @ResponseBody
 	List<ObjectiveResponse> queryUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
-		return objectiveService.queryByUserId(userId == null ? securityService.getLoggedUserId() : userId);
+		return objectiveService.findByUserId(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
@@ -49,7 +49,7 @@ public class ObjectiveController {
 	}
 
 	private void setUserId(ObjectiveRequest request) {
-		if(request.getUserId() == null) {
+		if (request.getUserId() == null) {
 			request.setUserId(securityService.getLoggedUserId());
 		}
 	}

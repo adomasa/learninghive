@@ -1,8 +1,10 @@
 package distributed.monolith.learninghive.model.response;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Value
+@Data
+@AllArgsConstructor
 public class TokenPair {
 	String jwt;
 	String refreshToken;

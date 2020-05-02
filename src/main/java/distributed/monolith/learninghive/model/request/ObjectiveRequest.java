@@ -11,6 +11,5 @@ public class ObjectiveRequest {
 	@NotNull
 	Long topicId;
 
-	@NotNull
 	Boolean completed;
 }
