@@ -23,20 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	private final JwtTokenProvider jwtTokenProvider;
-
-	//todo potential security issue. Node should be defined in cors config
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
-		corsConfiguration.addAllowedMethod("OPTIONS");
-		corsConfiguration.addAllowedMethod("PUT");
-		corsConfiguration.addAllowedMethod("DELETE");
-		corsConfiguration.addExposedHeader("Access-Control-Allow-Origin");
-		source.registerCorsConfiguration("/**", corsConfiguration);
-		return source;
-	}
+	private final AuthTokenProvider authTokenProvider;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -45,7 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.csrf().disable() //redundant thing for jwt token
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and()
-				.addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(new JwtTokenFilter(authTokenProvider), UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
 				.antMatchers(Paths.ACCOUNT_LOGIN).permitAll()
 				.antMatchers(Paths.ACCOUNT_REGISTER).permitAll()
@@ -59,6 +46,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 				});
 	}
+
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+		corsConfiguration.addAllowedMethod("OPTIONS");
+		corsConfiguration.addAllowedMethod("PUT");
+		corsConfiguration.addAllowedMethod("DELETE");
+		corsConfiguration.addExposedHeader("Access-Control-Allow-Origin");
+		source.registerCorsConfiguration("/**", corsConfiguration);
+		return source;
+	}
+
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
