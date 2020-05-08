@@ -10,7 +10,7 @@ public final class DateUtil {
 	}
 
 	public static void throwIfPastDate(java.sql.Date date) throws ChangingPastTrainingDayException {
-		if (LocalDate.now().isAfter((date.toLocalDate()))) {
+		if (LocalDate.now().isAfter(date.toLocalDate())) {
 			throw new ChangingPastTrainingDayException();
 		}
 	}
