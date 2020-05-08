@@ -3,10 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
-import distributed.monolith.learninghive.model.exception.InvalidTokenException;
-import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
-import distributed.monolith.learninghive.model.exception.UserHasSubordinatesException;
+import distributed.monolith.learninghive.model.exception.*;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.request.UserRequest;
@@ -173,5 +170,9 @@ public class UserServiceImpl implements UserService {
 		}
 		userRepository.save(userSubordinate);
 		userRepository.save(userSupervisor);
+
+		if (userRepository.isCircularHierarchy(userSupervisor.getId())) {
+			throw new CircularHierarchyException(User.class.getSimpleName(), userSupervisor.getId());
+		}
 	}
 }
