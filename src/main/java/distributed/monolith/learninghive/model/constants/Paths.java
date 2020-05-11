@@ -29,6 +29,9 @@ public final class Paths {
 	public static final String TRAINING_DAY_DELETE = "/trainingDay/delete";
 	public static final String TRAINING_DAY_UPDATE = "/trainingDay/update";
 
+	public static final String STATS_WORKERS = "/stats/workers";
+	public static final String STATS_TEAMS = "/stats/teams";
+	public static final String STATS_TEAMPROGRESS = "/stats/teamprogress";
 
 	private Paths() {
 	}

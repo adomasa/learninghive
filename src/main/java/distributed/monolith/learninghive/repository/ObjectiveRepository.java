@@ -14,5 +14,4 @@ public interface ObjectiveRepository extends JpaRepository<Objective, Long> {
 	List<Objective> findByTopicId(long id);
 
 	Objective findByUserIdAndTopicId(long userId, long topicId);
-
 }
