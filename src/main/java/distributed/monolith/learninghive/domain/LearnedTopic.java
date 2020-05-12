@@ -13,20 +13,20 @@ import java.util.Date;
 @OptimisticLocking(type = OptimisticLockType.VERSION)
 @Getter
 @Setter
-@Table(name = "objectives", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "topic_id"}))
-public class Objective {
+@Table(name = "learned_topic", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "topic_id"}))
+public class LearnedTopic {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private User user;
-
-	@ManyToOne
-	@JoinColumn(name = "topic_id")
-	private Topic topic;
-
 	@CreationTimestamp
 	private Date date;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	User user;
+
+	@ManyToOne
+	@JoinColumn(name = "topic_id", nullable = false)
+	Topic topic;
 }

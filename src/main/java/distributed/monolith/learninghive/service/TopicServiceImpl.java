@@ -1,14 +1,17 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.*;
 import distributed.monolith.learninghive.model.exception.CircularHierarchyException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.TopicRequest;
+import distributed.monolith.learninghive.model.response.LearnedTopicsResponse;
 import distributed.monolith.learninghive.model.response.TopicResponse;
+import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
+import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ public class TopicServiceImpl implements TopicService {
 
 	private final ObjectiveRepository objectiveRepository;
 	private final TopicRepository topicRepository;
+	private final LearnedTopicRepository learnedTopicRepository;
+	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -63,12 +68,20 @@ public class TopicServiceImpl implements TopicService {
 	@Transactional
 	public void delete(Long id) {
 		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id, Topic.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
+					Objective.class.getSimpleName());
 		}
 
 		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+
+		if (!topic.getTrainingDays().isEmpty()) {
+			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
+					TrainingDay.class.getSimpleName());
+		}
+
+		learnedTopicRepository.deleteByTopicId(id);
 
 		if (topic.getChildren().isEmpty()) {
 			Topic parentTopic = topic.getParent();
@@ -90,9 +103,42 @@ public class TopicServiceImpl implements TopicService {
 				.collect(Collectors.toList());
 	}
 
-	/* todo validate topic relations hierarchy */
 	@Override
-	public void mountEntity(Topic destination, TopicRequest source) {
+	public void setTopicLearned(long topicId, long userId, boolean isLearned) {
+		LearnedTopic learnedTopic = learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
+				.orElse(null);
+
+		if (isLearned && learnedTopic == null) {
+			addLearnedTopic(topicId, userId);
+		} else if (!isLearned && learnedTopic != null) {
+			learnedTopicRepository.delete(learnedTopic);
+		}
+	}
+
+	@Override
+	public LearnedTopicsResponse getLearnedTopics(long userId) {
+		LearnedTopicsResponse response = new LearnedTopicsResponse();
+		response.setTopics(learnedTopicRepository.findByUserId(userId)
+				.stream()
+				.map(l -> l.getTopic())
+				.collect(Collectors.toList()));
+		return response;
+	}
+
+	private void addLearnedTopic(long topicId, long userId) {
+		Topic topic = topicRepository.findById(topicId)
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), topicId));
+
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userId));
+
+		LearnedTopic learnedTopic = new LearnedTopic();
+		learnedTopic.setTopic(topic);
+		learnedTopic.setUser(user);
+		learnedTopicRepository.save(learnedTopic);
+	}
+
+	private void mountEntity(Topic destination, TopicRequest source) {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
 
