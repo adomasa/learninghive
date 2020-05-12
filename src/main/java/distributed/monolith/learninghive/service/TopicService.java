@@ -15,7 +15,9 @@ public interface TopicService {
 
 	List<TopicResponse> searchByTitlePart(String titlePart);
 
-	void setTopicLearned(long topicId, long userId, boolean isLearned);
+	void createLearnedTopic(long topicId, long userId);
 
-	LearnedTopicsResponse getLearnedTopics(long userId);
+	void deleteLearnedTopic(long topicId, long userId);
+
+	LearnedTopicsResponse findLearnedTopics(long userId);
 }

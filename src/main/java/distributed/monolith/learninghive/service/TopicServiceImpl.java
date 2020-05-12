@@ -104,28 +104,11 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	@Override
-	public void setTopicLearned(long topicId, long userId, boolean isLearned) {
-		LearnedTopic learnedTopic = learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
-				.orElse(null);
-
-		if (isLearned && learnedTopic == null) {
-			addLearnedTopic(topicId, userId);
-		} else if (!isLearned && learnedTopic != null) {
-			learnedTopicRepository.delete(learnedTopic);
+	public void createLearnedTopic(long topicId, long userId) {
+		if (!learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isEmpty()) {
+			return;
 		}
-	}
 
-	@Override
-	public LearnedTopicsResponse getLearnedTopics(long userId) {
-		LearnedTopicsResponse response = new LearnedTopicsResponse();
-		response.setTopics(learnedTopicRepository.findByUserId(userId)
-				.stream()
-				.map(l -> l.getTopic())
-				.collect(Collectors.toList()));
-		return response;
-	}
-
-	private void addLearnedTopic(long topicId, long userId) {
 		Topic topic = topicRepository.findById(topicId)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), topicId));
 
@@ -136,6 +119,26 @@ public class TopicServiceImpl implements TopicService {
 		learnedTopic.setTopic(topic);
 		learnedTopic.setUser(user);
 		learnedTopicRepository.save(learnedTopic);
+	}
+
+	@Override
+	public void deleteLearnedTopic(long topicId, long userId) {
+		LearnedTopic learnedTopic = learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
+				.orElse(null);
+
+		if (learnedTopic != null) {
+			learnedTopicRepository.delete(learnedTopic);
+		}
+	}
+
+	@Override
+	public LearnedTopicsResponse findLearnedTopics(long userId) {
+		LearnedTopicsResponse response = new LearnedTopicsResponse();
+		response.setTopics(learnedTopicRepository.findByUserId(userId)
+				.stream()
+				.map(l -> l.getTopic())
+				.collect(Collectors.toList()));
+		return response;
 	}
 
 	private void mountEntity(Topic destination, TopicRequest source) {

@@ -49,16 +49,21 @@ public class TopicController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = TOPIC_SET_LEARNED)
-	public void setTopicLearned(@RequestParam("id") Long id,
-	                            @RequestParam(name = "isLearned") Boolean isLearned) {
-		topicService.setTopicLearned(id, securityService.getLoggedUserId(), isLearned);
+	@PostMapping(path = TOPIC_CREATE_LEARNED)
+	public void createLearnedTopic(@RequestParam("id") Long id) {
+		topicService.createLearnedTopic(id, securityService.getLoggedUserId());
+	}
+
+	@ResponseStatus(HttpStatus.OK)
+	@DeleteMapping(path = TOPIC_DELETE_LEARNED)
+	public void deleteLearnedTopic(@RequestParam("id") Long id) {
+		topicService.deleteLearnedTopic(id, securityService.getLoggedUserId());
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = TOPIC_QUERY_LEARNED)
 	public LearnedTopicsResponse getLearnedTopics(
 			@RequestParam(value = "userId", required = false) Long userId) {
-		return topicService.getLearnedTopics(userId == null ? securityService.getLoggedUserId() : userId);
+		return topicService.findLearnedTopics(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 }
