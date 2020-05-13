@@ -9,7 +9,7 @@ import java.util.List;
 public interface StatisticsService {
 	List<UsersWithTopicResponse> findUsersWithTopics();
 
-	List<TeamsWithTopicResponse> findTeamsWithTopics();
+	List<TeamsWithTopicResponse> countSubordinatesWithTopics();
 
 	List<TeamTopicProgressResponse> findTeamsTopicProgress();
 }

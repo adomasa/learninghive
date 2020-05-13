@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.controller;
 import distributed.monolith.learninghive.model.response.TeamTopicProgressResponse;
 import distributed.monolith.learninghive.model.response.TeamsWithTopicResponse;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
-import distributed.monolith.learninghive.service.StatisticsServiceImpl;
+import distributed.monolith.learninghive.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,20 +19,20 @@ import static distributed.monolith.learninghive.model.constants.Paths.*;
 @RequiredArgsConstructor
 public class StatisticsController {
 
-	private final StatisticsServiceImpl statisticsService;
+	private final StatisticsService statisticsService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = STATS_WORKERS)
+	@GetMapping(path = STATS_EMPLOYEES)
 	public @ResponseBody
-	List<UsersWithTopicResponse> findUserInfo() {
+	List<UsersWithTopicResponse> findUsersWithTopics() {
 		return statisticsService.findUsersWithTopics();
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = STATS_TEAMS)
+	@GetMapping(path = STATS_SUBORDINATES)
 	public @ResponseBody
-	List<TeamsWithTopicResponse> findTeamInfo() {
-		return statisticsService.findTeamsWithTopics();
+	List<TeamsWithTopicResponse> countSubordinatesWithTopics() {
+		return statisticsService.countSubordinatesWithTopics();
 	}
 
 	@ResponseStatus(HttpStatus.OK)

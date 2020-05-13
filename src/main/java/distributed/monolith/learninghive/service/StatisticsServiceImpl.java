@@ -47,9 +47,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 	}
 
 	@Override
-	public List<TeamsWithTopicResponse> findTeamsWithTopics() {
+	public List<TeamsWithTopicResponse> countSubordinatesWithTopics() {
 		List<Topic> allTopics = topicRepository.findAll();
-		List<User> allLeaders = getAllLeaders();
+		List<User> allLeaders = getAllSupervisors();
 		List<TeamsWithTopicResponse> teamsWithTopicResponses = new ArrayList<>();
 
 		int counter = 0;
@@ -76,7 +76,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 	@Override
 	public List<TeamTopicProgressResponse> findTeamsTopicProgress() {
-		List<User> allLeaders = getAllLeaders();
+		List<User> allLeaders = getAllSupervisors();
 		List<Topic> allTopics = topicRepository.findAll();
 		List<String> learntTopics = new ArrayList<>();
 		List<String> plannedTopics = new ArrayList<>();
@@ -107,14 +107,14 @@ public class StatisticsServiceImpl implements StatisticsService {
 		return topicProgressResponses;
 	}
 
-	private List<User> getAllLeaders() {
+	private List<User> getAllSupervisors() {
 		List<User> allUsers = (List<User>) userRepository.findAll();
-		List<User> allLeaders = new ArrayList<>();
+		List<User> allSupervisors = new ArrayList<>();
 		for (User user : allUsers) {
 			if (!user.getSubordinates().isEmpty()) {
-				allLeaders.add(user);
+				allSupervisors.add(user);
 			}
 		}
-		return allLeaders;
+		return allSupervisors;
 	}
 }
