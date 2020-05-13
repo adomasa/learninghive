@@ -1,15 +1,13 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.model.response.TeamTopicProgressResponse;
-import distributed.monolith.learninghive.model.response.TeamsWithTopicResponse;
+import distributed.monolith.learninghive.model.response.ProgressResponse;
+import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
 
-import java.util.List;
-
 public interface StatisticsService {
-	List<UsersWithTopicResponse> findUsersWithTopics();
+	UsersWithTopicResponse findUsersWithTopics(long topicId, long userId);
 
-	List<TeamsWithTopicResponse> countSubordinatesWithTopics();
+	SubordinatesWithSubCount countSubordinatesWithTopics(long topicId, long userId);
 
-	List<TeamTopicProgressResponse> findTeamsTopicProgress();
+	ProgressResponse findSubordinatesProgress(long userId);
 }

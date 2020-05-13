@@ -34,7 +34,7 @@ public final class Paths {
 
 	public static final String STATS_EMPLOYEES = "/stats/employees";
 	public static final String STATS_SUBORDINATES = "/stats/subordinates";
-	public static final String STATS_TEAMPROGRESS = "/stats/teamprogress";
+	public static final String STATS_SUBPROGRESS = "/stats/subprogress";
 
 	private Paths() {
 	}

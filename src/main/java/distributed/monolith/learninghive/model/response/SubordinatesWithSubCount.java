@@ -1,13 +1,11 @@
 package distributed.monolith.learninghive.model.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-public class TeamsWithTopicResponse {
+public class SubordinatesWithSubCount {
 	String topic;
-	List<TeamResponse> teams;
+	List<SubordinateLearnedCount> subordinates;
 }

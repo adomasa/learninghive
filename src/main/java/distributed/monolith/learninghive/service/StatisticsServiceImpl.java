@@ -1,120 +1,126 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.Objective;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.response.TeamTopicProgressResponse;
-import distributed.monolith.learninghive.model.response.TeamResponse;
-import distributed.monolith.learninghive.model.response.TeamsWithTopicResponse;
+import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
+import distributed.monolith.learninghive.model.response.ProgressResponse;
+import distributed.monolith.learninghive.model.response.SubordinateLearnedCount;
+import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
-import distributed.monolith.learninghive.repository.ObjectiveRepository;
-import distributed.monolith.learninghive.repository.TopicRepository;
-import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
 	private final TopicRepository topicRepository;
-	private final ObjectiveRepository objectiveRepository;
 	private final UserRepository userRepository;
+	private final LearnedTopicRepository learnedTopicRepository;
+	private final TrainingDayRepository trainingDayRepository;
 
 	@Override
-	public List<UsersWithTopicResponse> findUsersWithTopics() {
-		List<Topic> allTopics = topicRepository.findAll();
-		List<String> namesOfWorkers = new ArrayList<>();
-		List<UsersWithTopicResponse> usersWithTopicResponses = new ArrayList<>();
+	public UsersWithTopicResponse findUsersWithTopics(long topicId, long userId) {
+		var supervisor = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						userId
+				));
+		var topic = topicRepository.findById(topicId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						Topic.class.getSimpleName(),
+						topicId
+				));
 
-		for (Topic topic : allTopics) {
-			List<Objective> allObjectives = objectiveRepository.findByTopicId(topic.getId());
+		List<String> names = new ArrayList<>();
 
-			for (Objective objective : allObjectives) {
-				if (objective.getCompleted()) {
-					namesOfWorkers.add(objective.getUser().getName() + " " + objective.getUser().getSurname());
+		List<User> subordinates = supervisor.getSubordinates();
+
+		for (User subordinate : subordinates) {
+			learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topicId)
+					.ifPresent(learnedTopic -> names.add(learnedTopic.getUser().getName()));
+		}
+
+		return new UsersWithTopicResponse(topic.getTitle(), names);
+	}
+
+	@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+	@Override
+	public SubordinatesWithSubCount countSubordinatesWithTopics(long topicId, long userId) {
+		var supervisor = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						userId
+				));
+		var topic = topicRepository.findById(topicId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						Topic.class.getSimpleName(),
+						topicId
+				));
+
+		List<User> subordinatesThatSupervise =
+				supervisor.getSubordinates()
+						.stream()
+						.filter(user -> !user.getSubordinates().isEmpty())
+						.collect(Collectors.toList());
+
+		SubordinatesWithSubCount subordinatesWithSubCount = new SubordinatesWithSubCount();
+		subordinatesWithSubCount.setTopic(topic.getTitle());
+
+		int count = 0;
+		List<SubordinateLearnedCount> subordinateLearnedCounts = new ArrayList<>();
+		for (User subordinateThatSupervises : subordinatesThatSupervise) {
+			List<User> subordinates = subordinateThatSupervises.getSubordinates();
+
+			for (User subordinate : subordinates) {
+				if (learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topicId).isPresent()) {
+					count++;
 				}
 			}
 
-			usersWithTopicResponses.add(new UsersWithTopicResponse(topic.getTitle(), namesOfWorkers));
-			namesOfWorkers.clear();
+			subordinateLearnedCounts.add(new SubordinateLearnedCount(subordinateThatSupervises.getName(),
+					count,
+					subordinateThatSupervises.getSubordinates().size()));
+			count = 0;
 		}
 
-		return usersWithTopicResponses;
+		subordinatesWithSubCount.setSubordinates(subordinateLearnedCounts);
+		return subordinatesWithSubCount;
 	}
 
 	@Override
-	public List<TeamsWithTopicResponse> countSubordinatesWithTopics() {
-		List<Topic> allTopics = topicRepository.findAll();
-		List<User> allLeaders = getAllSupervisors();
-		List<TeamsWithTopicResponse> teamsWithTopicResponses = new ArrayList<>();
+	public ProgressResponse findSubordinatesProgress(long userId) {
+		var supervisor = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						userId
+				));
+		Set<String> plannedTopics = new HashSet<>();
+		Set<String> learntTopics = new HashSet<>();
 
-		int counter = 0;
-		List<TeamResponse> teamResponses = new ArrayList<>();
-		for (Topic topic : allTopics) {
-			for (User leader : allLeaders) {
-				List<User> allSubordinates = leader.getSubordinates();
+		supervisor.getSubordinates()
+				.forEach(user -> learnedTopicRepository.findByUserId(user.getId())
+						.forEach(learnedTopic -> learntTopics.add(learnedTopic.getTopic().getTitle())));
 
-				for (User subordinate : allSubordinates) {
-					Objective objective = objectiveRepository.findByUserIdAndTopicId(subordinate.getId(), topic.getId());
-					if (objective != null && objective.getCompleted()) {
-						counter++;
-					}
-				}
-				teamResponses.add(new TeamResponse(leader.getName(), counter, allSubordinates.size()));
-				counter = 0;
-			}
-			teamsWithTopicResponses.add(new TeamsWithTopicResponse(topic.getTitle(), teamResponses));
-			teamResponses.clear();
-		}
-
-		return teamsWithTopicResponses;
-	}
-
-	@Override
-	public List<TeamTopicProgressResponse> findTeamsTopicProgress() {
-		List<User> allLeaders = getAllSupervisors();
-		List<Topic> allTopics = topicRepository.findAll();
-		List<String> learntTopics = new ArrayList<>();
-		List<String> plannedTopics = new ArrayList<>();
-		List<TeamTopicProgressResponse> topicProgressResponses = new ArrayList<>();
-		for (User leader : allLeaders) {
-			for (Topic topic : allTopics) {
-				List<User> allSubordinates = leader.getSubordinates();
-				for (User subordinate : allSubordinates) {
-					Objective objective = objectiveRepository.findByUserIdAndTopicId(subordinate.getId(), topic.getId());
-					if (objective != null) {
-						if (objective.getCompleted()) {
-							if (!learntTopics.contains(objective.getTopic().getTitle())) {
-								learntTopics.add(objective.getTopic().getTitle());
+		supervisor.getSubordinates()
+				.forEach(user -> trainingDayRepository.findByUserId(user.getId())
+						.forEach(trainingDay -> {
+							if (trainingDay.getScheduledDay().after(Date.valueOf(LocalDate.now()))) {
+								trainingDay.getTopics().forEach(topic -> plannedTopics.add(topic.getTitle()));
 							}
-						} else {
-							if (!plannedTopics.contains(objective.getTopic().getTitle())) {
-								plannedTopics.add(objective.getTopic().getTitle());
-							}
-						}
-					}
-				}
-			}
-			topicProgressResponses.add
-					(new TeamTopicProgressResponse(leader.getName(), plannedTopics, learntTopics));
-			plannedTopics.clear();
-			learntTopics.clear();
-		}
-		return topicProgressResponses;
-	}
+						}));
 
-	private List<User> getAllSupervisors() {
-		List<User> allUsers = (List<User>) userRepository.findAll();
-		List<User> allSupervisors = new ArrayList<>();
-		for (User user : allUsers) {
-			if (!user.getSubordinates().isEmpty()) {
-				allSupervisors.add(user);
-			}
-		}
-		return allSupervisors;
+		return new ProgressResponse(supervisor.getName(),
+				new ArrayList<>(plannedTopics),
+				new ArrayList<>(learntTopics));
 	}
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class TeamTopicProgressResponse {
+public class ProgressResponse {
 	String supervisor;
 	List<String> plannedTopics;
 	List<String> learntTopics;
