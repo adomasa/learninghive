@@ -13,4 +13,6 @@ public interface TrainingDayRepository extends JpaRepository<TrainingDay, Long> 
 	List<TrainingDay> findByUserId(long id);
 
 	Optional<TrainingDay> findByScheduledDayAndUserId(Date date, Long userId);
+
+	List<TrainingDay> findByIdNotAndUserId(long id, long userId);
 }
