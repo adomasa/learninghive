@@ -1,15 +1,14 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.Objective;
+import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.ChangingPastTrainingDayException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
-import distributed.monolith.learninghive.model.exception.ResourceDoesNotBelongToUser;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.TrainingDayRequest;
 import distributed.monolith.learninghive.model.response.TrainingDayResponse;
-import distributed.monolith.learninghive.repository.ObjectiveRepository;
+import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class TrainingDayServiceImpl implements TrainingDayService {
 
 	private final TrainingDayRepository trainingDayRepository;
-	private final ObjectiveRepository objectiveRepository;
+	private final TopicRepository topicRepository;
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
@@ -107,21 +106,13 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 						source.getUserId()));
 		destination.setUser(user);
 
-		destination.setObjectives(new ArrayList<>());
-		source.getObjectiveIds()
+		destination.setTopics(new ArrayList<>());
+		source.getTopicIds()
 				.stream()
 				.distinct()
-				.map(id -> objectiveRepository
+				.map(id -> topicRepository
 						.findById(id)
-						.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id)))
-				.forEach(objective -> {
-					if (user.getId() != objective.getUser().getId()) {
-						throw new ResourceDoesNotBelongToUser(
-								Objective.class.getSimpleName(),
-								objective.getId(),
-								user.getId());
-					}
-					destination.getObjectives().add(objective);
-				});
+						.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id)))
+				.forEach(topic -> destination.getTopics().add(topic));
 	}
 }

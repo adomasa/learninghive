@@ -26,10 +26,10 @@ public class TrainingDay {
 
 	@ManyToMany
 	@JoinTable(
-			name = "training_day_objective",
+			name = "training_day_topic",
 			joinColumns = @JoinColumn(name = "training_day_id"),
-			inverseJoinColumns = @JoinColumn(name = "objective_id"))
-	private List<Objective> objectives;
+			inverseJoinColumns = @JoinColumn(name = "topic_id"))
+	private List<Topic> topics;
 
 	@CreationTimestamp
 	private java.util.Date creationDate;
@@ -37,7 +37,7 @@ public class TrainingDay {
 	@Column(nullable = false, name = "scheduled_day")
 	private java.sql.Date scheduledDay;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String title;
 
 	private String description;

@@ -49,7 +49,7 @@ public class TrainingDayController {
 	}
 
 	private void setUserId(TrainingDayRequest request) {
-		if(request.getUserId() == null) {
+		if (request.getUserId() == null) {
 			request.setUserId(securityService.getLoggedUserId());
 		}
 	}
