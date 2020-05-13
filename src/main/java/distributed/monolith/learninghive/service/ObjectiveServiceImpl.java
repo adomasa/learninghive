@@ -2,17 +2,14 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Objective;
 import distributed.monolith.learninghive.domain.Topic;
-import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
-import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
-import distributed.monolith.learninghive.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -28,7 +25,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 	private final ObjectiveRepository objectiveRepository;
 	private final TopicRepository topicRepository;
 	private final UserRepository userRepository;
-	private final SecurityService securityService;
 	private final ModelMapper modelMapper;
 
 	@Override
@@ -63,11 +59,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
 
-		if (!objective.getTrainingDays().isEmpty()) {
-			throw new ResourceInUseException(Objective.class.getSimpleName(), id,
-					TrainingDay.class.getSimpleName());
-		}
-
 		objectiveRepository.delete(objective);
 	}
 
@@ -83,10 +74,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 	@Override
 	public void mountEntity(Objective destination, ObjectiveRequest source) {
-		if (source.getCompleted() != null) {
-			destination.setCompleted(source.getCompleted());
-		}
-
 		var topic = topicRepository.findById(source.getTopicId())
 				.orElseThrow(() -> new ResourceNotFoundException(
 								Topic.class.getSimpleName(),

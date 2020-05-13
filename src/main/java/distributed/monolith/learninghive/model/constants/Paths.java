@@ -12,6 +12,9 @@ public final class Paths {
 	public static final String TOPIC_QUERY = "/topic/q";
 	public static final String TOPIC_DELETE = "/topic/delete";
 	public static final String TOPIC_UPDATE = "/topic/update";
+	public static final String TOPIC_CREATE_LEARNED = "/topic/createLearned";
+	public static final String TOPIC_DELETE_LEARNED = "/topic/deleteLearned";
+	public static final String TOPIC_QUERY_LEARNED = "/topic/queryLearned";
 
 	public static final String OBJECTIVE_ADD = "/objective/add";
 	public static final String OBJECTIVE_QUERY = "/objective/q";
