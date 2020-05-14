@@ -189,7 +189,8 @@ public class UserServiceImpl implements UserService {
 			return;
 		}
 
-		if (!user.getSubordinates().isEmpty() && user.getRole() == Role.EMPLOYEE)
+		if (!user.getSubordinates().isEmpty() && user.getRole() == Role.EMPLOYEE) {
 			user.setRole(Role.SUPERVISOR);
+		}
 	}
 }

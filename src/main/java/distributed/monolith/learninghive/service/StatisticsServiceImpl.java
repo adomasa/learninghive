@@ -8,7 +8,10 @@ import distributed.monolith.learninghive.model.response.ProgressResponse;
 import distributed.monolith.learninghive.model.response.SubordinateLearnedCount;
 import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
-import distributed.monolith.learninghive.repository.*;
+import distributed.monolith.learninghive.repository.LearnedTopicRepository;
+import distributed.monolith.learninghive.repository.TopicRepository;
+import distributed.monolith.learninghive.repository.TrainingDayRepository;
+import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,15 +35,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public UsersWithTopicResponse findUsersWithTopics(long topicId, long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 		var topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Topic.class.getSimpleName(),
-						topicId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, topicId));
 
 		List<String> names = new ArrayList<>();
 
@@ -58,15 +55,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public SubordinatesWithSubCount countSubordinatesWithTopics(long topicId, long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 		var topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Topic.class.getSimpleName(),
-						topicId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, topicId));
 
 		List<User> subordinatesWithEmployees =
 				supervisor.getSubordinates()
@@ -101,10 +92,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public ProgressResponse findSubordinatesProgress(long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 		Set<String> plannedTopics = new HashSet<>();
 		Set<String> learntTopics = new HashSet<>();
 
