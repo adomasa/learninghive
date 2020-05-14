@@ -21,15 +21,15 @@ public class StatisticsController {
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = STATS_EMPLOYEES)
 	public @ResponseBody
-	UsersWithTopicResponse findUsersWithTopics(@RequestParam(name = "id") Long id) {
-		return statisticsService.findUsersWithTopics(id, securityService.getLoggedUserId());
+	UsersWithTopicResponse findUsersWithTopics(@RequestParam(name = "topicId") Long topicId) {
+		return statisticsService.findUsersWithTopics(topicId, securityService.getLoggedUserId());
 	}
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = STATS_SUBORDINATES)
 	public @ResponseBody
-	SubordinatesWithSubCount countSubordinatesWithTopics(@RequestParam(name = "id") Long id) {
-		return statisticsService.countSubordinatesWithTopics(id, securityService.getLoggedUserId());
+	SubordinatesWithSubCount countSubordinatesWithTopics(@RequestParam(name = "topicId") Long topicId) {
+		return statisticsService.countSubordinatesWithTopics(topicId, securityService.getLoggedUserId());
 	}
 
 	@ResponseStatus(HttpStatus.OK)

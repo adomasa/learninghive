@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.response.ProgressResponse;
@@ -67,7 +68,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 						topicId
 				));
 
-		List<User> subordinatesThatSupervise =
+		List<User> subordinatesWithEmployees =
 				supervisor.getSubordinates()
 						.stream()
 						.filter(user -> !user.getSubordinates().isEmpty())
@@ -76,9 +77,10 @@ public class StatisticsServiceImpl implements StatisticsService {
 		SubordinatesWithSubCount subordinatesWithSubCount = new SubordinatesWithSubCount();
 		subordinatesWithSubCount.setTopic(topic.getTitle());
 
-		int count = 0;
+
 		List<SubordinateLearnedCount> subordinateLearnedCounts = new ArrayList<>();
-		for (User subordinateThatSupervises : subordinatesThatSupervise) {
+		for (User subordinateThatSupervises : subordinatesWithEmployees) {
+			int count = 0;
 			List<User> subordinates = subordinateThatSupervises.getSubordinates();
 
 			for (User subordinate : subordinates) {
@@ -90,7 +92,6 @@ public class StatisticsServiceImpl implements StatisticsService {
 			subordinateLearnedCounts.add(new SubordinateLearnedCount(subordinateThatSupervises.getName(),
 					count,
 					subordinateThatSupervises.getSubordinates().size()));
-			count = 0;
 		}
 
 		subordinatesWithSubCount.setSubordinates(subordinateLearnedCounts);
@@ -111,16 +112,35 @@ public class StatisticsServiceImpl implements StatisticsService {
 				.forEach(user -> learnedTopicRepository.findByUserId(user.getId())
 						.forEach(learnedTopic -> learntTopics.add(learnedTopic.getTopic().getTitle())));
 
-		supervisor.getSubordinates()
-				.forEach(user -> trainingDayRepository.findByUserId(user.getId())
-						.forEach(trainingDay -> {
-							if (trainingDay.getScheduledDay().after(Date.valueOf(LocalDate.now()))) {
-								trainingDay.getTopics().forEach(topic -> plannedTopics.add(topic.getTitle()));
-							}
-						}));
+
+		for (User user : supervisor.getSubordinates()) {
+			plannedTopics.addAll(getNamesOfTopics(getPlannedTrainingDays(getUsersTrainingDays(user.getId()))));
+		}
 
 		return new ProgressResponse(supervisor.getName(),
 				new ArrayList<>(plannedTopics),
 				new ArrayList<>(learntTopics));
+	}
+
+	private List<String> getNamesOfTopics(List<TrainingDay> trainingDays) {
+		List<String> namesOfTopics = new ArrayList<>();
+		for (TrainingDay trainingDay : trainingDays) {
+			trainingDay.getTopics().forEach(topic -> namesOfTopics.add(topic.getTitle()));
+		}
+		return namesOfTopics;
+	}
+
+	private List<TrainingDay> getPlannedTrainingDays(List<TrainingDay> usersTrainingDays) {
+		List<TrainingDay> plannedTrainingDays = new ArrayList<>();
+		for (TrainingDay trainingDay : usersTrainingDays) {
+			if (trainingDay.getScheduledDay().after(Date.valueOf(LocalDate.now()))) {
+				plannedTrainingDays.add(trainingDay);
+			}
+		}
+		return plannedTrainingDays;
+	}
+
+	private List<TrainingDay> getUsersTrainingDays(long id) {
+		return trainingDayRepository.findByUserId(id);
 	}
 }
