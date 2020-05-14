@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.model.response;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import distributed.monolith.learninghive.domain.Objective;
+import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
 import lombok.Data;
 
@@ -22,5 +22,5 @@ public class TrainingDayResponse {
 
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
-	List<Objective> objectives;
+	List<Topic> objectives;
 }
