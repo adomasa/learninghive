@@ -29,43 +29,45 @@ public class StatisticsServiceImpl implements StatisticsService {
 	private final LearnedTopicRepository learnedTopicRepository;
 	private final TrainingDayRepository trainingDayRepository;
 
+	@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
 	@Override
-	public UsersWithTopicResponse findUsersWithTopics(long topicId, long userId) {
+	public List<UsersWithTopicResponse> findUsersWithTopics(long userId) {
 		var supervisor = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class.getSimpleName(),
 						userId
 				));
-		var topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Topic.class.getSimpleName(),
-						topicId
-				));
 
-		List<String> names = new ArrayList<>();
-
+		List<Topic> topics = topicRepository.findAll();
 		List<User> subordinates = supervisor.getSubordinates();
 
-		for (User subordinate : subordinates) {
-			learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topicId)
-					.ifPresent(learnedTopic -> names.add(learnedTopic.getUser().getName()));
+		List<UsersWithTopicResponse> usersWithTopicResponses = new ArrayList<>();
+
+		for (Topic topic : topics) {
+			List<String> listOfNames = new ArrayList<>();
+
+			UsersWithTopicResponse usersWithTopicResponse = new UsersWithTopicResponse();
+			usersWithTopicResponse.setTopic(topic.getTitle());
+
+			for (User subordinate : subordinates) {
+				learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topic.getId())
+						.ifPresent(learnedTopic -> listOfNames.add(getFullName(learnedTopic.getUser())));
+			}
+
+			usersWithTopicResponse.setUsers(listOfNames);
+			usersWithTopicResponses.add(usersWithTopicResponse);
 		}
 
-		return new UsersWithTopicResponse(topic.getTitle(), names);
+		return usersWithTopicResponses;
 	}
 
 	@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
 	@Override
-	public SubordinatesWithSubCount countSubordinatesWithTopics(long topicId, long userId) {
+	public List<SubordinatesWithSubCount> countSubordinatesWithTopics(long userId) {
 		var supervisor = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class.getSimpleName(),
 						userId
-				));
-		var topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Topic.class.getSimpleName(),
-						topicId
 				));
 
 		List<User> subordinatesWithEmployees =
@@ -74,28 +76,40 @@ public class StatisticsServiceImpl implements StatisticsService {
 						.filter(user -> !user.getSubordinates().isEmpty())
 						.collect(Collectors.toList());
 
-		SubordinatesWithSubCount subordinatesWithSubCount = new SubordinatesWithSubCount();
-		subordinatesWithSubCount.setTopic(topic.getTitle());
+		List<SubordinatesWithSubCount> subordinatesWithSubCounts = new ArrayList<>();
+		List<Topic> topics = topicRepository.findAll();
 
+		for (Topic topic : topics) {
+			SubordinatesWithSubCount subordinatesWithSubCount = new SubordinatesWithSubCount();
+			List<SubordinateLearnedCount> subordinateLearnedCounts = new ArrayList<>();
 
-		List<SubordinateLearnedCount> subordinateLearnedCounts = new ArrayList<>();
-		for (User subordinateThatSupervises : subordinatesWithEmployees) {
-			int count = 0;
-			List<User> subordinates = subordinateThatSupervises.getSubordinates();
+			subordinatesWithSubCount.setTopic(topic.getTitle());
 
-			for (User subordinate : subordinates) {
-				if (learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topicId).isPresent()) {
-					count++;
-				}
+			for (User subordinateWithEmployees : subordinatesWithEmployees) {
+				subordinateLearnedCounts.add(new SubordinateLearnedCount(getFullName(subordinateWithEmployees),
+						countLearnedTopics(subordinateWithEmployees.getSubordinates(), topic.getId()),
+						subordinateWithEmployees.getSubordinates().size()));
 			}
 
-			subordinateLearnedCounts.add(new SubordinateLearnedCount(subordinateThatSupervises.getName(),
-					count,
-					subordinateThatSupervises.getSubordinates().size()));
+			subordinatesWithSubCount.setSubordinates(subordinateLearnedCounts);
+			subordinatesWithSubCounts.add(subordinatesWithSubCount);
 		}
 
-		subordinatesWithSubCount.setSubordinates(subordinateLearnedCounts);
-		return subordinatesWithSubCount;
+		return subordinatesWithSubCounts;
+	}
+
+	private String getFullName(User subordinateWithEmployees) {
+		return subordinateWithEmployees.getName() + " " + subordinateWithEmployees.getSurname();
+	}
+
+	private int countLearnedTopics(List<User> subordinates, long id) {
+		int count = 0;
+		for (User subordinate : subordinates) {
+			if (learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), id).isPresent()) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	@Override

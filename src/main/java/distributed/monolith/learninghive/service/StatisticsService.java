@@ -4,10 +4,12 @@ import distributed.monolith.learninghive.model.response.ProgressResponse;
 import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
 
-public interface StatisticsService {
-	UsersWithTopicResponse findUsersWithTopics(long topicId, long userId);
+import java.util.List;
 
-	SubordinatesWithSubCount countSubordinatesWithTopics(long topicId, long userId);
+public interface StatisticsService {
+	List<UsersWithTopicResponse> findUsersWithTopics(long userId);
+
+	List<SubordinatesWithSubCount> countSubordinatesWithTopics(long userId);
 
 	ProgressResponse findSubordinatesProgress(long userId);
 }
