@@ -17,8 +17,8 @@ public class UserInfo {
 	String role;
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
-	User directSupervisor;
+	User supervisor;
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
-	List<User> directSubordinates;
+	List<User> subordinates;
 }
