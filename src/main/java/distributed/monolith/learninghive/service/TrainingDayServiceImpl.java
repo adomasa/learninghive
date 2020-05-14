@@ -20,6 +20,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,11 +65,11 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
 		//	throw new ChangingPastTrainingDayException();
 		//}
-		Date oldTrainingDayDate = trainingDay.getScheduledDay();
+		LocalDate oldTrainingDayDate = trainingDay.getScheduledDay().toLocalDate();
 		mountEntity(trainingDay, trainingDayRequest);
 
 		// Compare strings to compare only date without time
-		if (!oldTrainingDayDate.toString().equals(trainingDayRequest.getScheduledDay().toString())) {
+		if (!oldTrainingDayDate.equals(trainingDayRequest.getScheduledDay().toLocalDate())) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
 					trainingDay.getUser().getId());
 			throwIfViolatesRestrictions(trainingDays, trainingDay);
