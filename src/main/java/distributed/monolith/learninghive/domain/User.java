@@ -37,8 +37,8 @@ public class User {
 	@Column(nullable = false)
 	private String surname;
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	private List<Role> roles;
+	@Column(nullable = false)
+	private Role role;
 
 	@ManyToOne
 	private User supervisor;

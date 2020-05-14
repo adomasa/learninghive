@@ -3,6 +3,7 @@ package distributed.monolith.learninghive.controller;
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
 import distributed.monolith.learninghive.security.SecurityService;
+import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.ObjectiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,13 +17,16 @@ import static distributed.monolith.learninghive.model.constants.Paths.*;
 @RestController
 @RequiredArgsConstructor
 public class ObjectiveController {
+
 	private final ObjectiveService objectiveService;
 	private final SecurityService securityService;
+	private final AuthorityService authorityService;
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = OBJECTIVE_QUERY)
 	public @ResponseBody
-	List<ObjectiveResponse> queryUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
+	List<ObjectiveResponse> findUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
+		authorityService.validateLoggedUserOrSupervisor(userId);
 		return objectiveService.findByUserId(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
@@ -30,6 +34,7 @@ public class ObjectiveController {
 	@PostMapping(path = OBJECTIVE_ADD)
 	public @ResponseBody
 	ObjectiveResponse addObjective(@Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
 		setUserId(objectiveRequest);
 		return objectiveService.addObjective(objectiveRequest);
 	}
@@ -38,6 +43,7 @@ public class ObjectiveController {
 	@PutMapping(path = OBJECTIVE_UPDATE)
 	public ObjectiveResponse updateObjective(@RequestParam(name = "id") Long id,
 	                                         @Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
 		setUserId(objectiveRequest);
 		return objectiveService.updateObjective(id, objectiveRequest);
 	}

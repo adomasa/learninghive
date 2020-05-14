@@ -27,6 +27,12 @@ public class Objective {
 	@JoinColumn(name = "topic_id")
 	private Topic topic;
 
+	/**
+	 * User cannot edit objective which was assigned by supervisor.
+	 */
+	@ManyToOne
+	private User owner;
+
 	@CreationTimestamp
 	private Date date;
 }

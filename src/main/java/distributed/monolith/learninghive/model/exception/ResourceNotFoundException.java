@@ -15,17 +15,17 @@ public class ResourceNotFoundException extends RuntimeException {
 		super(String.format("%s not found", resource), e);
 	}
 
-	public ResourceNotFoundException(String resource, Long id) {
-		super(String.format("%s with id %d not found", resource, id));
+	public ResourceNotFoundException(Class<?> resource, Long id) {
+		super(String.format("%s with id %d not found", resource.getSimpleName(), id));
 	}
 
-	public ResourceNotFoundException(String resource, String id) {
-		super(String.format("%s with %s identifier not found", resource, id));
+	public ResourceNotFoundException(Class<?> resource, String id) {
+		super(String.format("%s with %s identifier not found", resource.getSimpleName(), id));
 	}
 
-	public ResourceNotFoundException(String resource, List<Long> idList) {
+	public ResourceNotFoundException(Class<?> resource, List<Long> idList) {
 		super(String.format("%s with ids %s not found",
-				resource,
+				resource.getSimpleName(),
 				idList.stream()
 						.map(String::valueOf)
 						.collect(Collectors.joining(","))));

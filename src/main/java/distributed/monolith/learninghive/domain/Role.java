@@ -2,15 +2,22 @@ package distributed.monolith.learninghive.domain;
 
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * Hacky implementation of Spring Authorities
+ */
 public enum Role implements GrantedAuthority {
 	/**
 	 * Super-user, single instance only
 	 */
 	ADMIN,
 	/**
-	 * Team leaders, team members
+	 * Supervisors
 	 */
-	CLIENT;
+	SUPERVISOR,
+	/**
+	 * Employees
+	 */
+	EMPLOYEE;
 
 	@Override
 	public String getAuthority() {

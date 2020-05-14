@@ -9,9 +9,11 @@ import java.util.List;
 @Repository
 public interface ObjectiveRepository extends JpaRepository<Objective, Long> {
 
-	List<Objective> findByUserId(long id);
+	List<Objective> findByUserId(long userId);
 
-	List<Objective> findByTopicId(long id);
+	List<Objective> findByTopicId(long userId);
+
+	List<Objective> deleteByUserId(long userId);
 
 	Objective findByUserIdAndTopicId(long userId, long topicId);
 }

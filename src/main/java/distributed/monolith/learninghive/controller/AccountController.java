@@ -1,15 +1,16 @@
 package distributed.monolith.learninghive.controller;
 
 import distributed.monolith.learninghive.domain.Role;
-import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.InvalidTokenException;
+import distributed.monolith.learninghive.model.exception.InvalidTokenException.Type;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserLogin;
 import distributed.monolith.learninghive.model.request.UserRegistration;
+import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.TokenPair;
-import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.AccountService;
+import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.EmailService;
 import distributed.monolith.learninghive.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collections;
 
 import static distributed.monolith.learninghive.model.constants.Paths.*;
 
@@ -28,6 +28,8 @@ public class AccountController {
 	private final AccountService accountService;
 	private final UserService userService;
 	private final SecurityService securityService;
+	private final AuthorityService authorityService;
+
 	private final EmailService emailService;
 
 	@PostMapping(path = ACCOUNT_REGISTER)
@@ -35,7 +37,7 @@ public class AccountController {
 	public @ResponseBody
 	TokenPair registerUser(@RequestParam("token") String invitationToken,
 	                       @Valid @RequestBody UserRegistration userRegistration) {
-		User user = userService.registerUser(invitationToken, userRegistration, Collections.singletonList(Role.CLIENT));
+		var user = userService.registerUser(invitationToken, userRegistration, Role.EMPLOYEE);
 		return accountService.doLoginUser(user);
 	}
 
@@ -44,7 +46,7 @@ public class AccountController {
 	public @ResponseBody
 	TokenPair tokenRefresh(@RequestParam("token") String refreshToken) {
 		return accountService.refreshAccessTokens(refreshToken)
-				.orElseThrow(() -> new InvalidTokenException("refresh", refreshToken));
+				.orElseThrow(() -> new InvalidTokenException(Type.REFRESH, refreshToken));
 	}
 
 	@PostMapping(path = ACCOUNT_LOGIN)
@@ -54,26 +56,26 @@ public class AccountController {
 		return accountService.loginUser(userLogin);
 	}
 
+	@PutMapping(path = USER_UPDATE)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateAccount(@RequestParam(name = "id", required = false) Long userId,
+	                          @Valid @RequestBody UserRequest userRequest) {
+		authorityService.validateLoggedUserOrAdmin(userId);
+		accountService.updateAccountData(userId == null ? securityService.getLoggedUserId() : userId, userRequest);
+	}
+
 	@DeleteMapping(path = ACCOUNT_LOGOUT)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void logoutUser() {
-		long userId = securityService.getLoggedUserId();
+		var userId = securityService.getLoggedUserId();
 		accountService.logoutUser(userId);
-	}
-
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = ACCOUNT_INFO)
-	public @ResponseBody
-	UserInfo findUserInfo() {
-		Long userId = securityService.getLoggedUserId();
-		return userService.getUserInfo(userId);
 	}
 
 	@PostMapping(path = ACCOUNT_INVITE)
 	public @ResponseBody
 	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
-		long userId = securityService.getLoggedUserId();
-		String invitationLink = userService.createInvitationLink(userInvitation, userId);
+		var userId = securityService.getLoggedUserId();
+		var invitationLink = userService.createInvitationLink(userInvitation, userId);
 		emailService.sendEmail(userInvitation.getEmail(), "Invitation link", invitationLink);
 		return invitationLink;
 	}

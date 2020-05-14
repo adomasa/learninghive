@@ -11,6 +11,8 @@ import lombok.Data;
 public class ObjectiveResponse {
 	long id;
 
+	boolean completed;
+
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
 	User userId;
@@ -18,4 +20,8 @@ public class ObjectiveResponse {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
 	Topic topicId;
+
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+	@JsonIdentityReference(alwaysAsId = true)
+	User owner;
 }

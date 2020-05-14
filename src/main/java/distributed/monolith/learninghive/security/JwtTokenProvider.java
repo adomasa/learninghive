@@ -10,11 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider implements AuthTokenProvider {
@@ -28,12 +26,9 @@ public class JwtTokenProvider implements AuthTokenProvider {
 	private long validityInMilliseconds;
 
 	@Override
-	public String createToken(Long userId, List<Role> roles) {
+	public String createToken(Long userId, Role role) {
 		Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
-		claims.put(CLAIM_ROLE,
-				roles.stream()
-						.map(s -> new SimpleGrantedAuthority(s.getAuthority()))
-						.collect(Collectors.toList()));
+		claims.put(CLAIM_ROLE, role);
 
 		Date now = new Date();
 		Date validity = new Date(now.getTime() + validityInMilliseconds);
@@ -58,9 +53,8 @@ public class JwtTokenProvider implements AuthTokenProvider {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Collection<SimpleGrantedAuthority> getAuthorities(String token) {
-		return (Collection<SimpleGrantedAuthority>) Jwts.parser()
+	public SimpleGrantedAuthority getAuthority(String token) {
+		return (SimpleGrantedAuthority) Jwts.parser()
 				.setSigningKey(secret)
 				.parseClaimsJws(token)
 				.getBody()
@@ -71,8 +65,8 @@ public class JwtTokenProvider implements AuthTokenProvider {
 	public Optional<Authentication> getAuthentication(String token) {
 		try {
 			var userId = getUserId(token);
-			var userAuthorities = getAuthorities(token);
-			return Optional.of(new JwtAuthentication(userId, userAuthorities));
+			var userAuthority = getAuthority(token);
+			return Optional.of(new JwtAuthentication(userId, Collections.singleton(userAuthority)));
 		} catch (ExpiredJwtException e) {
 			LOG.debug("Received expired token: {}", e.getMessage());
 		} catch (JwtException | IllegalArgumentException e) {

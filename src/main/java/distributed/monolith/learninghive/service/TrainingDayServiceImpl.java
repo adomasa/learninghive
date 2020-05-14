@@ -29,6 +29,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	private final TopicRepository topicRepository;
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
+	private final AuthorityService authorityService;
+
 
 	@Override
 	@Transactional
@@ -48,7 +50,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	public TrainingDayResponse updateTrainingDay(long trainingDayId, TrainingDayRequest trainingDayRequest) {
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(trainingDayId)
-				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class.getSimpleName(), trainingDayId));
+				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, trainingDayId));
 
 		throwIfDuplicate(trainingDayRequest, trainingDayId);
 
@@ -75,7 +77,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	public void deleteTrainingDay(long id) {
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, id));
 
 		if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
 			throw new ChangingPastTrainingDayException();
@@ -88,8 +90,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
 				.ifPresent(trainingDay -> {
 					if (trainingDay.getId() != id) {
-						throw new DuplicateResourceException(TrainingDay.class.getSimpleName(),
-								"userId and " + "scheduledDay",
+						throw new DuplicateResourceException(TrainingDay.class,
+								"userId and scheduledDay",
 								request.getUserId() + " and " + request.getScheduledDay());
 					}
 				});
@@ -102,8 +104,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 
 		User user = userRepository
 				.findById(source.getUserId())
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(),
-						source.getUserId()));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, source.getUserId()));
 		destination.setUser(user);
 
 		destination.setTopics(new ArrayList<>());
@@ -112,7 +113,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 				.distinct()
 				.map(id -> topicRepository
 						.findById(id)
-						.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id)))
+						.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id)))
 				.forEach(topic -> destination.getTopics().add(topic));
 	}
 }

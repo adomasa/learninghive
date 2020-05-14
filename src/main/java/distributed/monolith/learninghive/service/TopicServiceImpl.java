@@ -34,7 +34,7 @@ public class TopicServiceImpl implements TopicService {
 	@Transactional
 	public TopicResponse createTopic(TopicRequest topicRequest) {
 		if (topicRepository.findByTitle(topicRequest.getTitle()).isPresent()) {
-			throw new DuplicateResourceException(Topic.class.getSimpleName(), "title", topicRequest.getTitle());
+			throw new DuplicateResourceException(Topic.class, "title", topicRequest.getTitle());
 		}
 
 		var topic = new Topic();
@@ -42,7 +42,7 @@ public class TopicServiceImpl implements TopicService {
 		topic = topicRepository.saveAndFlush(topic);
 
 		if (topicRepository.isCircularHierarchy(topic.getId())) {
-			throw new CircularHierarchyException(Topic.class.getSimpleName());
+			throw new CircularHierarchyException(Topic.class);
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);
@@ -53,12 +53,12 @@ public class TopicServiceImpl implements TopicService {
 	public TopicResponse updateTopic(Long id, TopicRequest topicRequest) {
 		var topic = topicRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
 		mountEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
 		if (topicRepository.isCircularHierarchy(topic.getId())) {
-			throw new CircularHierarchyException(Topic.class.getSimpleName(), topic.getId());
+			throw new CircularHierarchyException(Topic.class, topic.getId());
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);
@@ -68,17 +68,15 @@ public class TopicServiceImpl implements TopicService {
 	@Transactional
 	public void delete(Long id) {
 		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
-					Objective.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, Objective.class);
 		}
 
 		var topic = topicRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
 
 		if (!topic.getTrainingDays().isEmpty()) {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
-					TrainingDay.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, TrainingDay.class);
 		}
 
 		learnedTopicRepository.deleteByTopicId(id);
@@ -90,7 +88,7 @@ public class TopicServiceImpl implements TopicService {
 			}
 			topicRepository.deleteById(id);
 		} else {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id, Topic.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, Topic.class);
 		}
 	}
 
@@ -105,15 +103,15 @@ public class TopicServiceImpl implements TopicService {
 
 	@Override
 	public void createLearnedTopic(long topicId, long userId) {
-		if (!learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isEmpty()) {
+		if (learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isPresent()) {
 			return;
 		}
 
 		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), topicId));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, topicId));
 
 		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userId));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 
 		LearnedTopic learnedTopic = new LearnedTopic();
 		learnedTopic.setTopic(topic);
@@ -123,12 +121,8 @@ public class TopicServiceImpl implements TopicService {
 
 	@Override
 	public void deleteLearnedTopic(long topicId, long userId) {
-		LearnedTopic learnedTopic = learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
-				.orElse(null);
-
-		if (learnedTopic != null) {
-			learnedTopicRepository.delete(learnedTopic);
-		}
+		learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
+				.ifPresent(learnedTopicRepository::delete);
 	}
 
 	@Override
@@ -136,7 +130,7 @@ public class TopicServiceImpl implements TopicService {
 		LearnedTopicsResponse response = new LearnedTopicsResponse();
 		response.setTopics(learnedTopicRepository.findByUserId(userId)
 				.stream()
-				.map(l -> l.getTopic())
+				.map(LearnedTopic::getTopic)
 				.collect(Collectors.toList()));
 		return response;
 	}
@@ -167,7 +161,7 @@ public class TopicServiceImpl implements TopicService {
 			List<Long> missingChildren = childrenId.stream()
 					.filter(id -> !presentChildren.contains(id))
 					.collect(Collectors.toList());
-			throw new ResourceNotFoundException(Topic.class.getSimpleName(), missingChildren);
+			throw new ResourceNotFoundException(Topic.class, missingChildren);
 		}
 		children.forEach(child -> child.setParent(parent));
 		return children;
@@ -175,7 +169,7 @@ public class TopicServiceImpl implements TopicService {
 
 	private Topic getUpdatedParentEntity(Topic child, Long parentId) {
 		Topic parent = topicRepository.findById(parentId)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), parentId));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, parentId));
 		parent.getChildren().add(child);
 
 		return parent;

@@ -21,6 +21,6 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 			"        select t.* from topics t join cte on cte.parent_id = t.id and t.id <> ?1)" +
 			"     SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END from cte where parent_id = ?1",
 			nativeQuery = true)
-	Boolean isCircularHierarchy(Long id);
+	boolean isCircularHierarchy(Long id);
 
 }
