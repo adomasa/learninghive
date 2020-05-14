@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -53,14 +52,13 @@ public class JwtTokenProvider implements AuthTokenProvider {
 		return Long.valueOf(userId);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public SimpleGrantedAuthority getAuthority(String token) {
-		return new SimpleGrantedAuthority(((Map<String, String>) Jwts.parser()
+		return new SimpleGrantedAuthority((String) Jwts.parser()
 				.setSigningKey(secret)
 				.parseClaimsJws(token)
 				.getBody()
-				.get(CLAIM_ROLE)).get("authority"));
+				.get(CLAIM_ROLE));
 	}
 
 	@Override
