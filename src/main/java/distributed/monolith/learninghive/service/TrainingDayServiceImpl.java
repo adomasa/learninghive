@@ -67,7 +67,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		Date oldTrainingDayDate = trainingDay.getScheduledDay();
 		mountEntity(trainingDay, trainingDayRequest);
 
-		if (oldTrainingDayDate != trainingDayRequest.getScheduledDay()) {
+		// Compare strings to compare only date without time
+		if (!oldTrainingDayDate.toString().equals(trainingDayRequest.getScheduledDay().toString())) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
 					trainingDay.getUser().getId());
 			throwIfViolatesRestrictions(trainingDays, trainingDay);
@@ -148,12 +149,10 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		restrictions.stream()
 				.filter(r -> r.getUser() == null)
 				.collect(Collectors.toList())
-				.stream()
 				.forEach(globalRestriction -> {
 					if (restrictions.stream()
-							.filter(r -> r.getUser() != null
-									&& r.getRestrictionType() == globalRestriction.getRestrictionType())
-							.findFirst().isPresent()) {
+							.anyMatch(r -> r.getUser() != null
+									&& r.getRestrictionType() == globalRestriction.getRestrictionType())) {
 						restrictions.remove(globalRestriction);
 					}
 				});

@@ -28,8 +28,7 @@ public class MonthRestrictionValidator extends RestrictionValidatorDecorator {
 			endDate = endDate.withDayOfMonth(endDate.lengthOfMonth())
 					.plusDays(1);
 
-			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() > restriction
-					.getDaysLimit() - 1) {
+			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() >= restriction.getDaysLimit()) {
 				return restriction;
 			}
 		}

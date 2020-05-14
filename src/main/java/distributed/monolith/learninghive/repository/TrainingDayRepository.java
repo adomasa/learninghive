@@ -14,5 +14,6 @@ public interface TrainingDayRepository extends JpaRepository<TrainingDay, Long> 
 
 	Optional<TrainingDay> findByScheduledDayAndUserId(Date date, Long userId);
 
+	// Used for querying all users training days except for one currently being updated
 	List<TrainingDay> findByIdNotAndUserId(long id, long userId);
 }

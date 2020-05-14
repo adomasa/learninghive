@@ -19,30 +19,30 @@ public class DayRestrictionValidator extends RestrictionValidatorDecorator {
 		Restriction restriction = findRestriction(restrictions, RestrictionType.DAYS_IN_A_ROW);
 		if (restriction != null) {
 			LocalDate date = newTrainingDay.getScheduledDay().toLocalDate();
-			List<LocalDate> existingsDates = existingTrainingDays
+			List<LocalDate> existingDates = existingTrainingDays
 					.stream()
 					.map(t -> t.getScheduledDay().toLocalDate())
 					.collect(Collectors.toList());
 
-			long daysInRow = findDaysInRowCount(existingsDates, date, restriction.getDaysLimit(), true) +
-					findDaysInRowCount(existingsDates, date, restriction.getDaysLimit(), false);
-			if (daysInRow > restriction.getDaysLimit() - 1) {
+			long daysInRow = findDaysInRowCount(existingDates, date, restriction.getDaysLimit(), true) +
+					findDaysInRowCount(existingDates, date, restriction.getDaysLimit(), false);
+			if (daysInRow >= restriction.getDaysLimit()) {
 				return restriction;
 			}
 		}
 		return decorator.findViolatedRestriction(existingTrainingDays, newTrainingDay, restrictions);
 	}
 
-	@SuppressWarnings("PMD.AvoidReassigningParameters")
-	private long findDaysInRowCount(List<LocalDate> days, LocalDate targetDate, long limit, boolean forward) {
+	// forward parameters specifies whether to look for days ahead of target date or before
+	private long findDaysInRowCount(List<LocalDate> days, LocalDate targetDate, long dayLimit, boolean forward) {
 		long count = 0;
 		long daysToAdd = forward ? 1 : -1;
+		LocalDate targetDateCopy = targetDate;
+		while (count < dayLimit) {
+			targetDateCopy = targetDateCopy.plusDays(daysToAdd);
+			LocalDate finalTargetDate = targetDateCopy;
 
-		while (count < limit) {
-			targetDate = targetDate.plusDays(daysToAdd);
-			LocalDate finalTargetDate = targetDate;
-
-			if (days.stream().filter(d -> d.equals(finalTargetDate)).findFirst().isEmpty()) {
+			if (!days.stream().anyMatch(d -> d.equals(finalTargetDate))) {
 				break;
 			}
 

@@ -29,8 +29,7 @@ public class WeekRestrictionValidator extends RestrictionValidatorDecorator {
 					.with(ChronoField.DAY_OF_WEEK, 1)
 					.plusWeeks(1);
 
-			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() > restriction
-					.getDaysLimit() - 1) {
+			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() >= restriction.getDaysLimit()) {
 				return restriction;
 			}
 		}

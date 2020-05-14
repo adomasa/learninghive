@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface RestrictionRepository extends JpaRepository<Restriction, Long> {
 	Optional<Restriction> findByUserIdAndRestrictionType(Long userId, RestrictionType type);
 
+	// Returns user specific restrictions and global restrictions
 	List<Restriction> findByUserIdOrUserIdIsNull(Long userId);
 
 	List<Restriction> findByUserId(Long userId);

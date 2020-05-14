@@ -28,8 +28,7 @@ public class YearRestrictionValidator extends RestrictionValidatorDecorator {
 					.withDayOfYear(1)
 					.plusYears(1);
 
-			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() > restriction
-					.getDaysLimit() - 1) {
+			if (findMatchingDays(existingTrainingDays, startDate, endDate).size() >= restriction.getDaysLimit()) {
 				return restriction;
 			}
 		}
