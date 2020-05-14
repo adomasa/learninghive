@@ -16,5 +16,4 @@ public interface ObjectiveRepository extends JpaRepository<Objective, Long> {
 	List<Objective> deleteByUserId(long userId);
 
 	Objective findByUserIdAndTopicId(long userId, long topicId);
-
 }
