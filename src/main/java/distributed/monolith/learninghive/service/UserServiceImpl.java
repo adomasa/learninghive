@@ -168,8 +168,8 @@ public class UserServiceImpl implements UserService {
 		if (!userSupervisor.getSubordinates().contains(userSubordinate)) {
 			userSupervisor.getSubordinates().add(userSubordinate);
 		}
-		userRepository.save(userSubordinate);
-		userRepository.save(userSupervisor);
+		userRepository.saveAndFlush(userSubordinate);
+		userRepository.saveAndFlush(userSupervisor);
 
 		if (userRepository.isCircularHierarchy(userSupervisor.getId())) {
 			throw new CircularHierarchyException(User.class.getSimpleName(), userSupervisor.getId());
