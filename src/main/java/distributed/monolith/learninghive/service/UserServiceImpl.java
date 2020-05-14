@@ -167,15 +167,29 @@ public class UserServiceImpl implements UserService {
 				.orElseThrow(() -> new ResourceNotFoundException(User.class, subordinateId));
 
 		userSubordinate.getSupervisor().getSubordinates().remove(userSubordinate);
+		updateUserRole(userSubordinate.getSupervisor());
+
 		userSubordinate.setSupervisor(userSupervisor);
 		if (!userSupervisor.getSubordinates().contains(userSubordinate)) {
 			userSupervisor.getSubordinates().add(userSubordinate);
+			updateUserRole(userSupervisor);
 		}
+
 		userRepository.saveAndFlush(userSubordinate);
 		userRepository.saveAndFlush(userSupervisor);
 
 		if (userRepository.isCircularHierarchy(userSupervisor.getId())) {
 			throw new CircularHierarchyException(User.class, userSupervisor.getId());
 		}
+	}
+
+	private void updateUserRole(User user) {
+		if (user.getSubordinates().isEmpty() && user.getRole() == Role.SUPERVISOR) {
+			user.setRole(Role.EMPLOYEE);
+			return;
+		}
+
+		if (!user.getSubordinates().isEmpty() && user.getRole() == Role.EMPLOYEE)
+			user.setRole(Role.SUPERVISOR);
 	}
 }
