@@ -3,7 +3,6 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
-import distributed.monolith.learninghive.model.exception.ChangingPastTrainingDayException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.TrainingDayRequest;
@@ -11,13 +10,13 @@ import distributed.monolith.learninghive.model.response.TrainingDayResponse;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.service.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,11 +52,9 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, trainingDayId));
 
 		throwIfDuplicate(trainingDayRequest, trainingDayId);
+		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
 		// todo should only be able to edit description
-		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
-		//	throw new ChangingPastTrainingDayException();
-		//}
 
 		mountEntity(trainingDay, trainingDayRequest);
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
@@ -79,9 +76,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, id));
 
-		if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
-			throw new ChangingPastTrainingDayException();
-		}
+		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
 		trainingDayRepository.delete(trainingDay);
 	}
