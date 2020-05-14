@@ -36,6 +36,4 @@ public class Topic {
 	@OneToMany(mappedBy = "parent")
 	private List<Topic> children;
 
-	@ManyToMany(mappedBy = "topics")
-	List<TrainingDay> trainingDays;
 }

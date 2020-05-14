@@ -12,5 +12,9 @@ import java.util.Optional;
 public interface TrainingDayRepository extends JpaRepository<TrainingDay, Long> {
 	List<TrainingDay> findByUserId(long id);
 
+	Optional<TrainingDay> findByIdAndUserId(long id, long userId);
+
+	List<TrainingDay> deleteByUserId(long id);
+
 	Optional<TrainingDay> findByScheduledDayAndUserId(Date date, Long userId);
 }

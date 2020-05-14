@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +29,8 @@ public class AdminServiceImpl implements AdminService {
 	@Override
 	@PostConstruct
 	public void initialiseAdminUser() {
-		if (userRepository.findByRoles(Role.ADMIN).isEmpty()) {
-			if (!userRepository.findByRoles(Role.CLIENT).isEmpty()) {
+		if (userRepository.findByRole(Role.ADMIN).isEmpty()) {
+			if (!userRepository.findByRoleNot(Role.ADMIN).isEmpty()) {
 				throw new IllegalStateException("Admin can be created only on empty DB");
 			}
 
@@ -44,7 +43,7 @@ public class AdminServiceImpl implements AdminService {
 					.password(passwordEncoder.encode(defaultPassword))
 					.name("admin")
 					.surname("admin")
-					.roles(Arrays.asList(Role.ADMIN, Role.CLIENT))
+					.role(Role.ADMIN)
 					.build();
 
 			userRepository.save(admin);

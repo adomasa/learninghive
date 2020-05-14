@@ -20,7 +20,7 @@ public class TrainingDayRequest {
 	// todo should maximum amount of topics be configurable?
 	@Size(min = 1, max = 4)
 	@NotNull
-	List<Long> topicIds;
+	List<Long> objectiveIds;
 
 	@NotNull
 	Date scheduledDay;

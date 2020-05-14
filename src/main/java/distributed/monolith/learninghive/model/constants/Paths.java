@@ -5,16 +5,12 @@ public final class Paths {
 	public static final String ACCOUNT_LOGIN = "/account/login";
 	public static final String ACCOUNT_REGISTER = "/account/register";
 	public static final String ACCOUNT_LOGOUT = "/account/logout";
-	public static final String ACCOUNT_INFO = "/account/info";
 	public static final String ACCOUNT_INVITE = "/account/invite";
 
 	public static final String TOPIC_ADD = "/topic/add";
 	public static final String TOPIC_QUERY = "/topic/q";
 	public static final String TOPIC_DELETE = "/topic/delete";
 	public static final String TOPIC_UPDATE = "/topic/update";
-	public static final String TOPIC_CREATE_LEARNED = "/topic/createLearned";
-	public static final String TOPIC_DELETE_LEARNED = "/topic/deleteLearned";
-	public static final String TOPIC_QUERY_LEARNED = "/topic/queryLearned";
 
 	public static final String OBJECTIVE_ADD = "/objective/add";
 	public static final String OBJECTIVE_QUERY = "/objective/q";
@@ -24,7 +20,9 @@ public final class Paths {
 
 	public static final String USER_DELETE = "/user/delete";
 	public static final String USER_UPDATE = "/user/update";
-	public static final String USER_QUERY = "/user/q";
+	public static final String USER_INFO = "/user/info";
+	public static final String USER_SUBORDINATES = "/user/subordinates";
+	public static final String USER_TEAM = "/user/team";
 	public static final String USER_SUPERVISOR = "/user/supervisor";
 
 	public static final String TRAINING_DAY_ADD = "/trainingDay/add";

@@ -7,11 +7,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class CircularHierarchyException extends RuntimeException {
 	private static final long serialVersionUID = 4341705841554249218L;
 
-	public CircularHierarchyException(String resource) {
-		super(String.format("Resource %s hierarchy contains circular references", resource));
+	public CircularHierarchyException(Class<?> resource) {
+		super(String.format("Resource %s hierarchy contains circular references", resource.getSimpleName()));
 	}
 
-	public CircularHierarchyException(String resource, long id) {
-		super(String.format("Resource %s with id %d hierarchy contains circular references", resource, id));
+	public CircularHierarchyException(Class<?> resource, long id) {
+		super(String.format("Resource %s with id %d hierarchy contains circular references",
+				resource.getSimpleName(),
+				id));
 	}
 }
