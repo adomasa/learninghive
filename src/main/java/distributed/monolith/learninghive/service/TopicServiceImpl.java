@@ -153,6 +153,10 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	private List<Topic> getUpdatedChildrenEntities(Topic parent, List<Long> childrenId) {
+		if (childrenId.stream().anyMatch(child -> child == parent.getId())) {
+			throw new CircularHierarchyException(Topic.class, parent.getId());
+		}
+
 		List<Topic> children = topicRepository.findAllById(childrenId);
 		if (children.size() != childrenId.size()) {
 			List<Long> presentChildren = children.stream()
@@ -171,11 +175,11 @@ public class TopicServiceImpl implements TopicService {
 		if (parentId == child.getId()) {
 			throw new CircularHierarchyException(Topic.class, child.getId());
 		}
+
 		Topic parent = topicRepository.findById(parentId)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, parentId));
 		parent.getChildren().add(child);
 
 		return parent;
 	}
-
 }
