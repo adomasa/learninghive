@@ -272,7 +272,7 @@ under the License.
     </rule>
     <rule ref="category/java/design.xml/TooManyMethods">
         <properties>
-            <property name="maxmethods" value="10" />
+            <property name="maxmethods" value="15"/>
         </properties>
     </rule>
     <rule ref="category/java/design.xml/UselessOverridingMethod">

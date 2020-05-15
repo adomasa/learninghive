@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 public class TrainingDayResponse {
 	Long id;
+	String title;
 	String description;
 	Date scheduledDate;
 

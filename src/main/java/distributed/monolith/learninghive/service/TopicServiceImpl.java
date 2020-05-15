@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("PMD")
 public class TopicServiceImpl implements TopicService {
 
 	private final ObjectiveRepository objectiveRepository;
