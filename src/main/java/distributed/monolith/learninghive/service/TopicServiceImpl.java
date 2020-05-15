@@ -33,9 +33,7 @@ public class TopicServiceImpl implements TopicService {
 	@Override
 	@Transactional
 	public TopicResponse createTopic(TopicRequest topicRequest) {
-		if (topicRepository.findByTitle(topicRequest.getTitle()).isPresent()) {
-			throw new DuplicateResourceException(Topic.class, "title", topicRequest.getTitle());
-		}
+		validateTopicTitle(topicRequest.getTitle());
 
 		var topic = new Topic();
 		mountEntity(topic, topicRequest);
@@ -51,6 +49,8 @@ public class TopicServiceImpl implements TopicService {
 	@Override
 	@Transactional
 	public TopicResponse updateTopic(Long id, TopicRequest topicRequest) {
+		validateTopicTitle(topicRequest.getTitle());
+
 		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
@@ -139,36 +139,57 @@ public class TopicServiceImpl implements TopicService {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
 
-		List<Topic> children = null;
-		if (source.getChildrenId() != null) {
-			children = getUpdatedChildrenEntities(destination, source.getChildrenId());
-		}
-		destination.setChildren(children);
-
-		Topic parent = null;
-		if (source.getParentId() != null) {
-			parent = getUpdatedParentEntity(destination, source.getParentId());
-		}
-		destination.setParent(parent);
+		mountChildren(destination, source.getChildrenId());
+		mountParent(destination, source.getParentId());
 	}
 
-	private List<Topic> getUpdatedChildrenEntities(Topic parent, List<Long> childrenId) {
-		if (childrenId.stream().anyMatch(child -> child == parent.getId())) {
+	private void mountParent(Topic target, Long parentId) {
+		Topic parent = null;
+		if (parentId != null) {
+			parent = getUpdatedParentEntity(target, parentId);
+		}
+		target.setParent(parent);
+		removeOutdatedParentReference(target, parentId);
+	}
+
+	private void mountChildren(Topic target, List<Long> childrenId) {
+		List<Topic> children = null;
+		if (childrenId != null) {
+			children = getUpdatedChildrenEntities(target, childrenId);
+		}
+		removeOutdatedParentReferences(target, childrenId);
+		target.setChildren(children);
+	}
+
+	private List<Topic> getUpdatedChildrenEntities(Topic parent, List<Long> childTopicIds) {
+		if (childTopicIds.stream().anyMatch(child -> child == parent.getId())) {
 			throw new CircularHierarchyException(Topic.class, parent.getId());
 		}
 
-		List<Topic> children = topicRepository.findAllById(childrenId);
-		if (children.size() != childrenId.size()) {
-			List<Long> presentChildren = children.stream()
+		var newChildTopics = topicRepository.findAllById(childTopicIds);
+		validateChildTopicIds(newChildTopics, childTopicIds);
+
+		newChildTopics.forEach(child -> child.setParent(parent));
+
+		return newChildTopics;
+	}
+
+	private void validateChildTopicIds(List<Topic> newChildTopicsInDb, List<Long> childTopicIds) {
+		if (newChildTopicsInDb.size() != childTopicIds.size()) {
+			List<Long> presentChildren = newChildTopicsInDb.stream()
 					.map(Topic::getId)
 					.collect(Collectors.toList());
-			List<Long> missingChildren = childrenId.stream()
+			List<Long> missingChildren = childTopicIds.stream()
 					.filter(id -> !presentChildren.contains(id))
 					.collect(Collectors.toList());
 			throw new ResourceNotFoundException(Topic.class, missingChildren);
 		}
-		children.forEach(child -> child.setParent(parent));
-		return children;
+	}
+
+	private void validateTopicTitle(String title) {
+		if (topicRepository.findByTitle(title).isPresent()) {
+			throw new DuplicateResourceException(Topic.class, "title", title);
+		}
 	}
 
 	private Topic getUpdatedParentEntity(Topic child, Long parentId) {
@@ -182,4 +203,26 @@ public class TopicServiceImpl implements TopicService {
 
 		return parent;
 	}
+
+	private void removeOutdatedParentReferences(Topic parent, List<Long> childTopicIds) {
+		var oldChildTopics = parent.getChildren();
+
+		List<Topic> topicsToUpdate;
+		if (childTopicIds == null) {
+			topicsToUpdate = oldChildTopics;
+		} else {
+			topicsToUpdate = oldChildTopics.stream()
+					.filter(oldTopic -> !childTopicIds.contains(oldTopic.getId()))
+					.collect(Collectors.toList());
+		}
+		topicsToUpdate.forEach(childWithoutParent -> childWithoutParent.setParent(null));
+	}
+
+	private void removeOutdatedParentReference(Topic target, Long parentId) {
+		if (target.getParent() != null && target.getParent().getId() != parentId) {
+			List<Topic> children = target.getParent().getChildren();
+			children.remove(target);
+		}
+	}
+
 }
