@@ -22,5 +22,5 @@ public class TrainingDayResponse {
 
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
-	List<Topic> objectives;
+	List<Topic> topics;
 }
