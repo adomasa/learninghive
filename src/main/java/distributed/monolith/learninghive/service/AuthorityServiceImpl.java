@@ -35,7 +35,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 		var sourceUserId = securityService.getLoggedUserId();
 		return findAllSupervisors(userId).stream()
 				.map(User::getId)
-				.noneMatch(supervisorId -> sourceUserId == userId);
+				.anyMatch(supervisorId -> sourceUserId == supervisorId);
 	}
 
 	@Override
