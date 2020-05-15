@@ -80,7 +80,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 	@Override
 	public void validateLoggedUserOrSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException {
-		if (isNotLoggedUser(targetUserId) && isLoggedUserSupervisorOf(targetUserId)) {
+		if (isNotLoggedUser(targetUserId) && !isLoggedUserSupervisorOf(targetUserId)) {
 			throw new InsufficientAuthorityException();
 		}
 	}
