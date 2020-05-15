@@ -168,6 +168,9 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	private Topic getUpdatedParentEntity(Topic child, Long parentId) {
+		if (parentId == child.getId()) {
+			throw new CircularHierarchyException(Topic.class, child.getId());
+		}
 		Topic parent = topicRepository.findById(parentId)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, parentId));
 		parent.getChildren().add(child);
