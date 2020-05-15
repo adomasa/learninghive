@@ -1,12 +1,13 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.*;
+import distributed.monolith.learninghive.domain.Objective;
+import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.model.exception.CircularHierarchyException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.TopicRequest;
-import distributed.monolith.learninghive.model.response.LearnedTopicsResponse;
 import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("PMD")
 public class TopicServiceImpl implements TopicService {
 
 	private final ObjectiveRepository objectiveRepository;
@@ -101,40 +103,6 @@ public class TopicServiceImpl implements TopicService {
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public void createLearnedTopic(long topicId, long userId) {
-		if (learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isPresent()) {
-			return;
-		}
-
-		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, topicId));
-
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
-
-		LearnedTopic learnedTopic = new LearnedTopic();
-		learnedTopic.setTopic(topic);
-		learnedTopic.setUser(user);
-		learnedTopicRepository.save(learnedTopic);
-	}
-
-	@Override
-	public void deleteLearnedTopic(long topicId, long userId) {
-		learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
-				.ifPresent(learnedTopicRepository::delete);
-	}
-
-	@Override
-	public LearnedTopicsResponse findLearnedTopics(long userId) {
-		LearnedTopicsResponse response = new LearnedTopicsResponse();
-		response.setTopics(learnedTopicRepository.findByUserId(userId)
-				.stream()
-				.map(LearnedTopic::getTopic)
-				.collect(Collectors.toList()));
-		return response;
-	}
-
 	private void mountEntity(Topic destination, TopicRequest source) {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
@@ -149,7 +117,7 @@ public class TopicServiceImpl implements TopicService {
 			parent = getUpdatedParentEntity(target, parentId);
 		}
 		target.setParent(parent);
-		removeOutdatedParentReference(target, parentId);
+		removeOutdatedChildReference(target, parentId);
 	}
 
 	private void mountChildren(Topic target, List<Long> childrenId) {
@@ -218,7 +186,7 @@ public class TopicServiceImpl implements TopicService {
 		topicsToUpdate.forEach(childWithoutParent -> childWithoutParent.setParent(null));
 	}
 
-	private void removeOutdatedParentReference(Topic target, Long parentId) {
+	private void removeOutdatedChildReference(Topic target, Long parentId) {
 		if (target.getParent() != null && target.getParent().getId() != parentId) {
 			List<Topic> children = target.getParent().getChildren();
 			children.remove(target);
