@@ -13,4 +13,6 @@ public interface RestrictionService {
 	List<RestrictionResponse> findByUserId(Long userId, boolean includeGlobal);
 
 	void deleteRestriction(Long id);
+
+	List<RestrictionResponse> copyToTeam(Long supervisorId, Long restrictionId);
 }

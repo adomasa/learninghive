@@ -44,6 +44,15 @@ public class RestrictionController {
 		return restrictionService.updateRestriction(id, restrictionRequest);
 	}
 
+	@ResponseStatus(HttpStatus.OK)
+	@PostMapping(path = RESTRICTIONS_COPY)
+	public @ResponseBody
+	List<RestrictionResponse> copyRestriction(@RequestParam(name = "supervisorId", required = false) Long supervisorId,
+	                                      @RequestParam(name = "restrictionId") Long restrictionId) {
+		return restrictionService.copyToTeam(supervisorId == null ?
+				securityService.getLoggedUserId() : supervisorId, restrictionId);
+	}
+
 	@DeleteMapping(path = RESTRICTIONS_DELETE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteRestriction(@RequestParam(name = "id") Long id) {

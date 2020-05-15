@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,42 @@ public class RestrictionServiceImpl implements RestrictionService {
 
 
 		restrictionRepository.delete(restriction);
+	}
+
+	@Override
+	@Transactional
+	public List<RestrictionResponse> copyToTeam(Long supervisorId, Long restrictionId) {
+		User supervisor = userRepository.findById(supervisorId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class.getSimpleName(),
+						supervisorId
+				));
+		Restriction sourceRestriction = restrictionRepository.findById(restrictionId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						Restriction.class.getSimpleName(),
+						restrictionId
+				));
+
+		List<Restriction> restrictions = supervisor.getSubordinates()
+				.stream()
+				.map(subordinate -> findOrCreateRestriction(subordinate, sourceRestriction))
+				.collect(Collectors.toList());
+
+		return restrictionRepository.saveAll(restrictions)
+				.stream()
+				.map(r -> modelMapper.map(r, RestrictionResponse.class))
+				.collect(Collectors.toList());
+	}
+
+	private Restriction findOrCreateRestriction(User user, Restriction sourceRestriction) {
+		Restriction targetRestriction = restrictionRepository
+				.findByUserIdAndRestrictionType(user.getId(), sourceRestriction.getRestrictionType())
+				.orElse(new Restriction());
+
+		targetRestriction.setUser(user);
+		targetRestriction.setDaysLimit(sourceRestriction.getDaysLimit());
+		targetRestriction.setRestrictionType(sourceRestriction.getRestrictionType());
+		return targetRestriction;
 	}
 
 	private void mountEntity(Restriction destination, RestrictionRequest source) {
