@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 		var user = doRegister(invitation, userRegistration, role);
 		var userWhoInvited = invitation.getUserWhoInvited();
 		userWhoInvited.getSubordinates().add(user);
-		userWhoInvited.setRole(Role.SUPERVISOR);
+		updateUserRole(userWhoInvited);
 		invitationRepository.delete(invitation);
 		return user;
 	}
@@ -192,11 +192,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void updateUserRole(User user) {
+		if (user.getRole() == Role.ADMIN) {
+			return;
+		}
+
+		// Lost all subordinates
 		if (user.getSubordinates().isEmpty() && user.getRole() == Role.SUPERVISOR) {
 			user.setRole(Role.EMPLOYEE);
 			return;
 		}
 
+		// Got first subordinates
 		if (!user.getSubordinates().isEmpty() && user.getRole() == Role.EMPLOYEE) {
 			user.setRole(Role.SUPERVISOR);
 		}
