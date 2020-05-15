@@ -57,6 +57,7 @@ public class UserController {
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public void updateUserSupervisor(@RequestParam(name = "supervisorId") Long supervisorId,
 	                                 @RequestParam(name = "subordinateId") Long subordinateId) {
+		authorityService.validateNotSelf(subordinateId);
 		userService.updateUserSupervisor(supervisorId, subordinateId);
 	}
 }

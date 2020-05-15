@@ -46,6 +46,13 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
+	public void validateNotSelf(Long userId) {
+		if (securityService.getLoggedUserId() == userId) {
+			throw new IllegalStateException("Origin can't update itself");
+		}
+	}
+
+	@Override
 	public boolean isLoggedUserMatching(Role role) {
 		return securityService.getLoggedUserRole() == role;
 	}

@@ -27,6 +27,8 @@ public interface AuthorityService {
 	 */
 	void validateLoggedUserOrAdmin(@Nullable Long userId) throws InsufficientAuthorityException;
 
+	void validateNotSelf(@Nullable Long userId);
+
 	boolean isLoggedUserMatching(Role role);
 
 	List<User> findAllSupervisors(@Nullable Long userId);
