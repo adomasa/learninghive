@@ -17,10 +17,6 @@ security:
       secret:
       expireLength: 900000 # 15 minutes
 
-server:
-  error:
-    include-stacktrace: never
-
 frontend:
   scheme: "http"
   url: "localhost:3001"
