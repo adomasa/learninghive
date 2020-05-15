@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static distributed.monolith.learninghive.model.constants.Paths.*;
+import static distributed.monolith.learninghive.model.constants.Paths.OBJECTIVE;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class ObjectiveController {
 	private final AuthorityService authorityService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = OBJECTIVE_QUERY)
+	@GetMapping(path = OBJECTIVE)
 	public @ResponseBody
 	List<ObjectiveResponse> findUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
 		authorityService.validateLoggedUserOrSupervisor(userId);
@@ -31,7 +31,7 @@ public class ObjectiveController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = OBJECTIVE_ADD)
+	@PostMapping(path = OBJECTIVE)
 	public @ResponseBody
 	ObjectiveResponse addObjective(@Valid @RequestBody ObjectiveRequest objectiveRequest) {
 		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
@@ -40,7 +40,7 @@ public class ObjectiveController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = OBJECTIVE_UPDATE)
+	@PutMapping(path = OBJECTIVE)
 	public ObjectiveResponse updateObjective(@RequestParam(name = "id") Long id,
 	                                         @Valid @RequestBody ObjectiveRequest objectiveRequest) {
 		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
@@ -48,7 +48,7 @@ public class ObjectiveController {
 		return objectiveService.updateObjective(id, objectiveRequest);
 	}
 
-	@DeleteMapping(path = OBJECTIVE_DELETE)
+	@DeleteMapping(path = OBJECTIVE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteObjective(@RequestParam(name = "id") Long id) {
 		objectiveService.deleteObjective(id);

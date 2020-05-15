@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -28,7 +28,7 @@ public class JwtTokenProvider implements AuthTokenProvider {
 	@Override
 	public String createToken(Long userId, Role role) {
 		Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
-		claims.put(CLAIM_ROLE, role.getAuthority());
+		claims.put(CLAIM_ROLE, role);
 
 		Date now = new Date();
 		Date validity = new Date(now.getTime() + validityInMilliseconds);
@@ -53,8 +53,8 @@ public class JwtTokenProvider implements AuthTokenProvider {
 	}
 
 	@Override
-	public SimpleGrantedAuthority getAuthority(String token) {
-		return new SimpleGrantedAuthority((String) Jwts.parser()
+	public GrantedAuthority getAuthority(String token) {
+		return Role.valueOf((String) Jwts.parser()
 				.setSigningKey(secret)
 				.parseClaimsJws(token)
 				.getBody()

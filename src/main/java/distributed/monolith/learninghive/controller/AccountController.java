@@ -56,7 +56,7 @@ public class AccountController {
 		return accountService.loginUser(userLogin);
 	}
 
-	@PutMapping(path = USER_UPDATE)
+	@PutMapping(path = ACCOUNT)
 	@ResponseStatus(HttpStatus.OK)
 	public void updateAccount(@RequestParam(name = "id", required = false) Long userId,
 	                          @Valid @RequestBody UserRequest userRequest) {

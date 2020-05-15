@@ -21,7 +21,7 @@ public class UserController {
 	private final AuthorityService authorityService;
 	private final SecurityService securityService;
 
-	@DeleteMapping(path = USER_DELETE)
+	@DeleteMapping(path = USER)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@RequestParam(name = "id", required = false) long userId) {
 		authorityService.validateLoggedUserOrAdmin(userId);
@@ -29,7 +29,7 @@ public class UserController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = USER_INFO)
+	@GetMapping(path = USER)
 	public @ResponseBody
 	UserInfo findUserInfo(@RequestParam(name = "id", required = false) Long userId) {
 		authorityService.validateLoggedUserOrSupervisor(userId);

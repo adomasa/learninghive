@@ -12,6 +12,7 @@ import distributed.monolith.learninghive.repository.InvitationRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,8 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final ObjectiveRepository objectiveRepository;
 	private final TrainingDayRepository trainingDayRepository;
+
+	private final SecurityService securityService;
 
 	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper modelMapper;
@@ -144,6 +148,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserInfo> findTeamMembers(long userId) {
+		if (securityService.getLoggedUserRole() == Role.ADMIN) {
+			return Collections.emptyList();
+		}
+
 		return userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class,

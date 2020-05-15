@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static distributed.monolith.learninghive.model.constants.Paths.*;
+import static distributed.monolith.learninghive.model.constants.Paths.TRAINING_DAY;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +23,7 @@ public class TrainingDayController {
 	private final AuthorityService authorityService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = TRAINING_DAY_QUERY)
+	@GetMapping(path = TRAINING_DAY)
 	public @ResponseBody
 	List<TrainingDayResponse> queryTrainingDays(@RequestParam(name = "userId", required = false) Long userId) {
 		authorityService.validateLoggedUserOrSupervisor(userId);
@@ -31,7 +31,7 @@ public class TrainingDayController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = TRAINING_DAY_ADD)
+	@PostMapping(path = TRAINING_DAY)
 	public @ResponseBody
 	TrainingDayResponse addTrainingDay(@Valid @RequestBody TrainingDayRequest trainingDayRequest) {
 		authorityService.validateLoggedUserOrSupervisor(trainingDayRequest.getUserId());
@@ -40,7 +40,7 @@ public class TrainingDayController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = TRAINING_DAY_UPDATE)
+	@PutMapping(path = TRAINING_DAY)
 	public TrainingDayResponse updateTrainingDay(@RequestParam(name = "id") Long id,
 	                                             @Valid @RequestBody TrainingDayRequest trainingDayRequest) {
 		authorityService.validateLoggedUserOrSupervisor(trainingDayRequest.getUserId());
@@ -48,7 +48,7 @@ public class TrainingDayController {
 		return trainingDayService.updateTrainingDay(id, trainingDayRequest);
 	}
 
-	@DeleteMapping(path = TRAINING_DAY_DELETE)
+	@DeleteMapping(path = TRAINING_DAY)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteTrainingDay(@RequestParam(name = "id") Long id) {
 		trainingDayService.deleteTrainingDay(id);
