@@ -13,6 +13,9 @@ public final class Paths {
 
 	public static final String OBJECTIVE = "/objective";
 
+	public static final String RESTRICTIONS = "/restriction/add";
+	public static final String RESTRICTIONS_COPY = "/restriction/copyToTeam";
+
 	public static final String USER = "/user";
 	public static final String USER_SUBORDINATES = "/user/subordinates";
 	public static final String USER_TEAM = "/user/team";

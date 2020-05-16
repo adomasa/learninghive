@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -13,6 +14,7 @@ import java.util.Locale;
 
 @SpringBootApplication
 @RequiredArgsConstructor
+@ImportResource("classpath:beans.xml")
 public class LearningHiveApplication {
 
 	public static void main(String[] args) {

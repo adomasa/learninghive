@@ -1,21 +1,26 @@
 package distributed.monolith.learninghive.service;
 
+import distributed.monolith.learninghive.domain.Restriction;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
+import distributed.monolith.learninghive.model.exception.RestrictionViolationException;
 import distributed.monolith.learninghive.model.request.TrainingDayRequest;
 import distributed.monolith.learninghive.model.response.TrainingDayResponse;
+import distributed.monolith.learninghive.repository.RestrictionRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.restrictions.RestrictionValidator;
 import distributed.monolith.learninghive.service.util.DateUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,9 +32,9 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	private final TrainingDayRepository trainingDayRepository;
 	private final TopicRepository topicRepository;
 	private final UserRepository userRepository;
+	private final RestrictionValidator restrictionValidator;
+	private final RestrictionRepository restrictionRepository;
 	private final ModelMapper modelMapper;
-	private final AuthorityService authorityService;
-
 
 	@Override
 	@Transactional
@@ -41,6 +46,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		TrainingDay trainingDay = new TrainingDay();
 		mountEntity(trainingDay, trainingDayRequest);
 
+		List<TrainingDay> trainingDays = trainingDayRepository.findByUserId(trainingDay.getUser().getId());
+		throwIfViolatesRestrictions(trainingDays, trainingDay);
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
 	}
 
@@ -56,7 +63,19 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 
 		// todo should only be able to edit description
 
+		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
+		//	throw new ChangingPastTrainingDayException();
+		//}
+		LocalDate oldTrainingDayDate = trainingDay.getScheduledDay().toLocalDate();
 		mountEntity(trainingDay, trainingDayRequest);
+
+		// Compare strings to compare only date without time
+		if (!oldTrainingDayDate.equals(trainingDayRequest.getScheduledDay().toLocalDate())) {
+			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
+					trainingDay.getUser().getId());
+			throwIfViolatesRestrictions(trainingDays, trainingDay);
+		}
+
 		return modelMapper.map(trainingDayRepository.save(trainingDay), TrainingDayResponse.class);
 	}
 
@@ -75,21 +94,9 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, id));
-
 		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
 		trainingDayRepository.delete(trainingDay);
-	}
-
-	private void throwIfDuplicate(TrainingDayRequest request, Long id) {
-		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
-				.ifPresent(trainingDay -> {
-					if (trainingDay.getId() != id) {
-						throw new DuplicateResourceException(TrainingDay.class,
-								"userId and scheduledDay",
-								request.getUserId() + " and " + request.getScheduledDay());
-					}
-				});
 	}
 
 	private void mountEntity(TrainingDay destination, TrainingDayRequest source) {
@@ -110,5 +117,44 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 						.findById(id)
 						.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id)))
 				.forEach(topic -> destination.getTopics().add(topic));
+	}
+
+	private void throwIfDuplicate(TrainingDayRequest request, Long id) {
+		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
+				.ifPresent(trainingDay -> {
+					if (trainingDay.getId() != id) {
+						throw new DuplicateResourceException(TrainingDay.class,
+								"userId and " + "scheduledDay",
+								request.getUserId() + " and " + request.getScheduledDay());
+					}
+				});
+	}
+
+	private void throwIfViolatesRestrictions(List<TrainingDay> existingTrainingDays, TrainingDay trainingDay) {
+		List<Restriction> restrictions = findApplicableRestrictions(trainingDay.getUser().getId());
+
+		Restriction restriction = restrictionValidator.findViolatedRestriction(existingTrainingDays,
+				trainingDay, restrictions);
+		if (restriction != null) {
+			throw new RestrictionViolationException(restriction);
+		}
+	}
+
+	private List<Restriction> findApplicableRestrictions(Long userId) {
+		List<Restriction> restrictions = restrictionRepository.findByUserIdOrUserIdIsNull(userId);
+
+		// Remove global restrictions if there is a user specific restriction of same type
+		restrictions.stream()
+				.filter(r -> r.getUser() == null)
+				.collect(Collectors.toList())
+				.forEach(globalRestriction -> {
+					if (restrictions.stream()
+							.anyMatch(r -> r.getUser() != null
+									&& r.getRestrictionType() == globalRestriction.getRestrictionType())) {
+						restrictions.remove(globalRestriction);
+					}
+				});
+
+		return restrictions;
 	}
 }
