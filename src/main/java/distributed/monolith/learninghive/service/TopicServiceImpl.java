@@ -1,12 +1,13 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.domain.*;
+import distributed.monolith.learninghive.domain.Objective;
+import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.model.exception.CircularHierarchyException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceInUseException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.request.TopicRequest;
-import distributed.monolith.learninghive.model.response.LearnedTopicsResponse;
 import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
@@ -33,16 +34,14 @@ public class TopicServiceImpl implements TopicService {
 	@Override
 	@Transactional
 	public TopicResponse createTopic(TopicRequest topicRequest) {
-		if (topicRepository.findByTitle(topicRequest.getTitle()).isPresent()) {
-			throw new DuplicateResourceException(Topic.class.getSimpleName(), "title", topicRequest.getTitle());
-		}
+		validateTopicTitle(topicRequest.getTitle());
 
 		var topic = new Topic();
 		mountEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
 		if (topicRepository.isCircularHierarchy(topic.getId())) {
-			throw new CircularHierarchyException(Topic.class.getSimpleName());
+			throw new CircularHierarchyException(Topic.class);
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);
@@ -51,14 +50,16 @@ public class TopicServiceImpl implements TopicService {
 	@Override
 	@Transactional
 	public TopicResponse updateTopic(Long id, TopicRequest topicRequest) {
+		validateTopicTitle(topicRequest.getTitle());
+
 		var topic = topicRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
 		mountEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
 		if (topicRepository.isCircularHierarchy(topic.getId())) {
-			throw new CircularHierarchyException(Topic.class.getSimpleName(), topic.getId());
+			throw new CircularHierarchyException(Topic.class, topic.getId());
 		}
 
 		return modelMapper.map(topic, TopicResponse.class);
@@ -68,17 +69,15 @@ public class TopicServiceImpl implements TopicService {
 	@Transactional
 	public void delete(Long id) {
 		if (!objectiveRepository.findByTopicId(id).isEmpty()) {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
-					Objective.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, Objective.class);
 		}
 
 		var topic = topicRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
 
 		if (!topic.getTrainingDays().isEmpty()) {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id,
-					TrainingDay.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, TrainingDay.class);
 		}
 
 		learnedTopicRepository.deleteByTopicId(id);
@@ -90,7 +89,7 @@ public class TopicServiceImpl implements TopicService {
 			}
 			topicRepository.deleteById(id);
 		} else {
-			throw new ResourceInUseException(Topic.class.getSimpleName(), id, Topic.class.getSimpleName());
+			throw new ResourceInUseException(Topic.class, id, Topic.class);
 		}
 	}
 
@@ -103,82 +102,94 @@ public class TopicServiceImpl implements TopicService {
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public void createLearnedTopic(long topicId, long userId) {
-		if (!learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isEmpty()) {
-			return;
-		}
-
-		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), topicId));
-
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userId));
-
-		LearnedTopic learnedTopic = new LearnedTopic();
-		learnedTopic.setTopic(topic);
-		learnedTopic.setUser(user);
-		learnedTopicRepository.save(learnedTopic);
-	}
-
-	@Override
-	public void deleteLearnedTopic(long topicId, long userId) {
-		LearnedTopic learnedTopic = learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
-				.orElse(null);
-
-		if (learnedTopic != null) {
-			learnedTopicRepository.delete(learnedTopic);
-		}
-	}
-
-	@Override
-	public LearnedTopicsResponse findLearnedTopics(long userId) {
-		LearnedTopicsResponse response = new LearnedTopicsResponse();
-		response.setTopics(learnedTopicRepository.findByUserId(userId)
-				.stream()
-				.map(l -> l.getTopic())
-				.collect(Collectors.toList()));
-		return response;
-	}
-
 	private void mountEntity(Topic destination, TopicRequest source) {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
 
-		List<Topic> children = null;
-		if (source.getChildrenId() != null) {
-			children = getUpdatedChildrenEntities(destination, source.getChildrenId());
-		}
-		destination.setChildren(children);
-
-		Topic parent = null;
-		if (source.getParentId() != null) {
-			parent = getUpdatedParentEntity(destination, source.getParentId());
-		}
-		destination.setParent(parent);
+		mountChildren(destination, source.getChildrenId());
+		mountParent(destination, source.getParentId());
 	}
 
-	private List<Topic> getUpdatedChildrenEntities(Topic parent, List<Long> childrenId) {
-		List<Topic> children = topicRepository.findAllById(childrenId);
-		if (children.size() != childrenId.size()) {
-			List<Long> presentChildren = children.stream()
+	private void mountParent(Topic target, Long parentId) {
+		Topic parent = null;
+		if (parentId != null) {
+			parent = getUpdatedParentEntity(target, parentId);
+		}
+		target.setParent(parent);
+		removeOutdatedChildReference(target, parentId);
+	}
+
+	private void mountChildren(Topic target, List<Long> childrenId) {
+		List<Topic> children = null;
+		if (childrenId != null) {
+			children = getUpdatedChildrenEntities(target, childrenId);
+		}
+		removeOutdatedParentReferences(target, childrenId);
+		target.setChildren(children);
+	}
+
+	private List<Topic> getUpdatedChildrenEntities(Topic parent, List<Long> childTopicIds) {
+		if (childTopicIds.stream().anyMatch(child -> child == parent.getId())) {
+			throw new CircularHierarchyException(Topic.class, parent.getId());
+		}
+
+		var newChildTopics = topicRepository.findAllById(childTopicIds);
+		validateChildTopicIds(newChildTopics, childTopicIds);
+
+		newChildTopics.forEach(child -> child.setParent(parent));
+
+		return newChildTopics;
+	}
+
+	private void validateChildTopicIds(List<Topic> newChildTopicsInDb, List<Long> childTopicIds) {
+		if (newChildTopicsInDb.size() != childTopicIds.size()) {
+			List<Long> presentChildren = newChildTopicsInDb.stream()
 					.map(Topic::getId)
 					.collect(Collectors.toList());
-			List<Long> missingChildren = childrenId.stream()
+			List<Long> missingChildren = childTopicIds.stream()
 					.filter(id -> !presentChildren.contains(id))
 					.collect(Collectors.toList());
-			throw new ResourceNotFoundException(Topic.class.getSimpleName(), missingChildren);
+			throw new ResourceNotFoundException(Topic.class, missingChildren);
 		}
-		children.forEach(child -> child.setParent(parent));
-		return children;
+	}
+
+	private void validateTopicTitle(String title) {
+		if (topicRepository.findByTitle(title).isPresent()) {
+			throw new DuplicateResourceException(Topic.class, "title", title);
+		}
 	}
 
 	private Topic getUpdatedParentEntity(Topic child, Long parentId) {
+		if (parentId == child.getId()) {
+			throw new CircularHierarchyException(Topic.class, child.getId());
+		}
+
 		Topic parent = topicRepository.findById(parentId)
-				.orElseThrow(() -> new ResourceNotFoundException(Topic.class.getSimpleName(), parentId));
+				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, parentId));
 		parent.getChildren().add(child);
 
 		return parent;
+	}
+
+	private void removeOutdatedParentReferences(Topic parent, List<Long> childTopicIds) {
+		var oldChildTopics = parent.getChildren();
+
+		List<Topic> topicsToUpdate;
+		if (childTopicIds == null) {
+			topicsToUpdate = oldChildTopics;
+		} else {
+			topicsToUpdate = oldChildTopics.stream()
+					.filter(oldTopic -> !childTopicIds.contains(oldTopic.getId()))
+					.collect(Collectors.toList());
+		}
+		topicsToUpdate.forEach(childWithoutParent -> childWithoutParent.setParent(null));
+	}
+
+	private void removeOutdatedChildReference(Topic target, Long parentId) {
+		if (target.getParent() != null && target.getParent().getId() != parentId) {
+			List<Topic> children = target.getParent().getChildren();
+			children.remove(target);
+		}
 	}
 
 }

@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.request.UserLogin;
+import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.TokenPair;
 
 import java.util.Optional;
@@ -14,6 +15,8 @@ public interface AccountService {
 	String createRefreshToken(User user);
 
 	TokenPair loginUser(UserLogin userLogin);
+
+	void updateAccountData(Long userId, UserRequest userRequest);
 
 	void logoutUser(long userId);
 }

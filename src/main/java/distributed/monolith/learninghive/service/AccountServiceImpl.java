@@ -5,6 +5,7 @@ import distributed.monolith.learninghive.domain.UserRefreshToken;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.exception.WrongPasswordException;
 import distributed.monolith.learninghive.model.request.UserLogin;
+import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.repository.UserRefreshTokenRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
@@ -28,7 +29,7 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public TokenPair doLoginUser(User user) {
-		String jwt = authTokenProvider.createToken(user.getId(), user.getRoles());
+		String jwt = authTokenProvider.createToken(user.getId(), user.getRole());
 		String refreshToken = createRefreshToken(user);
 		return new TokenPair(jwt, refreshToken);
 	}
@@ -52,7 +53,7 @@ public class AccountServiceImpl implements AccountService {
 						throw new WrongPasswordException();
 					}
 				})
-				.orElseThrow(() -> new ResourceNotFoundException(User.class.getSimpleName(), userLogin.getEmail()));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userLogin.getEmail()));
 	}
 
 	/**
@@ -72,6 +73,22 @@ public class AccountServiceImpl implements AccountService {
 		refreshTokenRepository.save(newRefreshToken);
 
 		return newTokenValue;
+	}
+
+	@Override
+	public void updateAccountData(Long userId, UserRequest userRequest) {
+		var userToUpdate = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class,
+						userId
+				));
+
+		userToUpdate.setEmail(userRequest.getEmail());
+		userToUpdate.setName(userRequest.getName());
+		userToUpdate.setSurname(userRequest.getSurname());
+		userToUpdate.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+
+		userRepository.save(userToUpdate);
 	}
 
 	/**

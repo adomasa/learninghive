@@ -10,6 +10,7 @@ import distributed.monolith.learninghive.model.response.ObjectiveResponse;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.security.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,15 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
+	private final AuthorityService authorityService;
+	private final SecurityService securityService;
+
 	@Override
 	public ObjectiveResponse updateObjective(long id, ObjectiveRequest objectiveRequest) {
 		var objective = objectiveRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
+
+		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
 
 		// todo is there any point to allow updating user or topic
 		mountEntity(objective, objectiveRequest);
@@ -38,17 +44,27 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
 	}
 
+	private void setObjectiveOwner(Objective objective) {
+		var owner = userRepository.findById(securityService.getLoggedUserId())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class,
+						securityService.getLoggedUserId())
+				);
+		objective.setOwner(owner);
+	}
+
 	@Override
 	public ObjectiveResponse addObjective(ObjectiveRequest objectiveRequest) {
 		if (objectiveRepository.findByUserIdAndTopicId(
 				objectiveRequest.getUserId(), objectiveRequest.getTopicId()) != null) {
-			throw new DuplicateResourceException(Objective.class.getSimpleName(),
+			throw new DuplicateResourceException(Objective.class,
 					"user and topic ids",
 					objectiveRequest.getUserId() + " and " + objectiveRequest.getTopicId());
 		}
 
 		var objective = new Objective();
 		mountEntity(objective, objectiveRequest);
+		setObjectiveOwner(objective);
 
 		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
 	}
@@ -57,7 +73,8 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 	public void deleteObjective(long id) {
 		var objective = objectiveRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
+				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
+		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
 
 		objectiveRepository.delete(objective);
 	}
@@ -76,7 +93,7 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 	public void mountEntity(Objective destination, ObjectiveRequest source) {
 		var topic = topicRepository.findById(source.getTopicId())
 				.orElseThrow(() -> new ResourceNotFoundException(
-								Topic.class.getSimpleName(),
+								Topic.class,
 								source.getTopicId()
 						)
 				);
@@ -84,7 +101,7 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 		var user = userRepository.findById(source.getUserId())
 				.orElseThrow(() -> new ResourceNotFoundException(
-								User.class.getSimpleName(),
+								User.class,
 								source.getUserId()
 						)
 				);
