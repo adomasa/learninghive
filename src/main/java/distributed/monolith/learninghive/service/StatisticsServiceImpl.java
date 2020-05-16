@@ -8,7 +8,10 @@ import distributed.monolith.learninghive.model.response.ProgressResponse;
 import distributed.monolith.learninghive.model.response.SubordinateLearnedCount;
 import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
 import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
-import distributed.monolith.learninghive.repository.*;
+import distributed.monolith.learninghive.repository.LearnedTopicRepository;
+import distributed.monolith.learninghive.repository.TopicRepository;
+import distributed.monolith.learninghive.repository.TrainingDayRepository;
+import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,29 +36,23 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public List<UsersWithTopicResponse> findUsersWithTopics(long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 
-		List<Topic> topics = topicRepository.findAll();
-		List<User> subordinates = supervisor.getSubordinates();
+		var topics = topicRepository.findAll();
+		var subordinates = supervisor.getSubordinates();
 
-		List<UsersWithTopicResponse> usersWithTopicResponses = new ArrayList<>();
+		var usersWithTopicResponses = new ArrayList<UsersWithTopicResponse>();
 
 		for (Topic topic : topics) {
-			List<String> listOfNames = new ArrayList<>();
+			var listOfNames = new ArrayList<String>();
 
-			UsersWithTopicResponse usersWithTopicResponse = new UsersWithTopicResponse();
-			usersWithTopicResponse.setTopic(topic.getTitle());
 
 			for (User subordinate : subordinates) {
 				learnedTopicRepository.findByUserIdAndTopicId(subordinate.getId(), topic.getId())
 						.ifPresent(learnedTopic -> listOfNames.add(getFullName(learnedTopic.getUser())));
 			}
 
-			usersWithTopicResponse.setUsers(listOfNames);
-			usersWithTopicResponses.add(usersWithTopicResponse);
+			usersWithTopicResponses.add(new UsersWithTopicResponse(topic.getTitle(), listOfNames));
 		}
 
 		return usersWithTopicResponses;
@@ -65,10 +62,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public List<SubordinatesWithSubCount> countSubordinatesWithTopics(long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 
 		List<User> subordinatesWithEmployees =
 				supervisor.getSubordinates()
@@ -76,14 +70,10 @@ public class StatisticsServiceImpl implements StatisticsService {
 						.filter(user -> !user.getSubordinates().isEmpty())
 						.collect(Collectors.toList());
 
-		List<SubordinatesWithSubCount> subordinatesWithSubCounts = new ArrayList<>();
-		List<Topic> topics = topicRepository.findAll();
-
+		var subordinatesWithSubCounts = new ArrayList<SubordinatesWithSubCount>();
+		var topics = topicRepository.findAll();
 		for (Topic topic : topics) {
-			SubordinatesWithSubCount subordinatesWithSubCount = new SubordinatesWithSubCount();
-			List<SubordinateLearnedCount> subordinateLearnedCounts = new ArrayList<>();
-
-			subordinatesWithSubCount.setTopic(topic.getTitle());
+			var subordinateLearnedCounts = new ArrayList<SubordinateLearnedCount>();
 
 			for (User subordinateWithEmployees : subordinatesWithEmployees) {
 				subordinateLearnedCounts.add(new SubordinateLearnedCount(getFullName(subordinateWithEmployees),
@@ -91,8 +81,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 						subordinateWithEmployees.getSubordinates().size()));
 			}
 
-			subordinatesWithSubCount.setSubordinates(subordinateLearnedCounts);
-			subordinatesWithSubCounts.add(subordinatesWithSubCount);
+			subordinatesWithSubCounts.add(new SubordinatesWithSubCount(topic.getTitle(), subordinateLearnedCounts));
 		}
 
 		return subordinatesWithSubCounts;
@@ -115,10 +104,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 	@Override
 	public ProgressResponse findSubordinatesProgress(long userId) {
 		var supervisor = userRepository.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						userId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId));
 		Set<String> plannedTopics = new HashSet<>();
 		Set<String> learntTopics = new HashSet<>();
 

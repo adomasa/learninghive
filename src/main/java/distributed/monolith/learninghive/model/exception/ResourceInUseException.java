@@ -8,7 +8,10 @@ public class ResourceInUseException extends RuntimeException {
 
 	private static final long serialVersionUID = -618529787486992309L;
 
-	public ResourceInUseException(String resource, Long id, String ownerResource) {
-		super(String.format("%s with id %d is used by %s", resource, id, ownerResource));
+	public ResourceInUseException(Class<?> resource, Long id, Class<?> ownerResource) {
+		super(String.format("%s with id %d is used by %s",
+				resource.getSimpleName(),
+				id,
+				ownerResource.getSimpleName()));
 	}
 }

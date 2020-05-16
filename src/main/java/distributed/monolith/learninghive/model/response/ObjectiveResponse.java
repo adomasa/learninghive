@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
@@ -18,4 +19,9 @@ public class ObjectiveResponse {
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 	@JsonIdentityReference(alwaysAsId = true)
 	Topic topicId;
+
+	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+	@JsonIdentityReference(alwaysAsId = true)
+	@JsonProperty("owningUserId")
+	User owner;
 }

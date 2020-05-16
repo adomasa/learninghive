@@ -10,8 +10,8 @@ public class DuplicateResourceException extends RuntimeException {
 
 	private static final long serialVersionUID = 3431265431294510711L;
 
-	public DuplicateResourceException(String resource, String property, String propertyValue) {
-		super(String.format(ERROR_FORMAT, resource, property, propertyValue));
+	public DuplicateResourceException(Class<?> resource, String property, String propertyValue) {
+		super(String.format(ERROR_FORMAT, resource.getSimpleName(), property, propertyValue));
 	}
 
 	public DuplicateResourceException(Exception exception, String resource, String property, String propertyValue) {

@@ -8,7 +8,7 @@ public class ResourceDoesNotBelongToUser extends RuntimeException {
 
 	private static final long serialVersionUID = -7765585126624241007L;
 
-	public ResourceDoesNotBelongToUser(String resource, Long id, Long userId) {
-		super(String.format("%s with id %d does not belong to user with id %s", resource, id, userId));
+	public ResourceDoesNotBelongToUser(Class<?> resource, Long id, Long userId) {
+		super(String.format("%s with id %d does not belong to user with id %s", resource.getSimpleName(), id, userId));
 	}
 }

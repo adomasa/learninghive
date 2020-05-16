@@ -3,6 +3,7 @@ package distributed.monolith.learninghive.controller;
 import distributed.monolith.learninghive.model.request.ObjectiveRequest;
 import distributed.monolith.learninghive.model.response.ObjectiveResponse;
 import distributed.monolith.learninghive.security.SecurityService;
+import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.ObjectiveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,38 +12,43 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static distributed.monolith.learninghive.model.constants.Paths.*;
+import static distributed.monolith.learninghive.model.constants.Paths.OBJECTIVE;
 
 @RestController
 @RequiredArgsConstructor
 public class ObjectiveController {
+
 	private final ObjectiveService objectiveService;
 	private final SecurityService securityService;
+	private final AuthorityService authorityService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = OBJECTIVE_QUERY)
+	@GetMapping(path = OBJECTIVE)
 	public @ResponseBody
-	List<ObjectiveResponse> queryUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
+	List<ObjectiveResponse> findUserObjectives(@RequestParam(name = "userId", required = false) Long userId) {
+		authorityService.validateLoggedUserOrSupervisor(userId);
 		return objectiveService.findByUserId(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = OBJECTIVE_ADD)
+	@PostMapping(path = OBJECTIVE)
 	public @ResponseBody
 	ObjectiveResponse addObjective(@Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
 		setUserId(objectiveRequest);
 		return objectiveService.addObjective(objectiveRequest);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = OBJECTIVE_UPDATE)
+	@PutMapping(path = OBJECTIVE)
 	public ObjectiveResponse updateObjective(@RequestParam(name = "id") Long id,
 	                                         @Valid @RequestBody ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisor(objectiveRequest.getUserId());
 		setUserId(objectiveRequest);
 		return objectiveService.updateObjective(id, objectiveRequest);
 	}
 
-	@DeleteMapping(path = OBJECTIVE_DELETE)
+	@DeleteMapping(path = OBJECTIVE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteObjective(@RequestParam(name = "id") Long id) {
 		objectiveService.deleteObjective(id);
