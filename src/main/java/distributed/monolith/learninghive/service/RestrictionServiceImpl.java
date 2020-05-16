@@ -12,9 +12,8 @@ import distributed.monolith.learninghive.repository.RestrictionRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.restrictions.RestrictionType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
-
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -40,9 +39,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 	@Override
 	public RestrictionResponse updateRestriction(Long id, RestrictionRequest restrictionRequest) {
 		Restriction restriction = restrictionRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Restriction.class.getSimpleName(),
-						id));
+				.orElseThrow(() -> new ResourceNotFoundException(Restriction.class, id));
 
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		if (userId != restrictionRequest.getUserId() ||
@@ -69,8 +66,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 	public void deleteRestriction(Long id) {
 		Restriction restriction = restrictionRepository
 				.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException(Objective.class.getSimpleName(), id));
-
+				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
 
 		restrictionRepository.delete(restriction);
 	}
@@ -79,15 +75,9 @@ public class RestrictionServiceImpl implements RestrictionService {
 	@Transactional
 	public List<RestrictionResponse> copyToTeam(Long supervisorId, Long restrictionId) {
 		User supervisor = userRepository.findById(supervisorId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						User.class.getSimpleName(),
-						supervisorId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(User.class, supervisorId));
 		Restriction sourceRestriction = restrictionRepository.findById(restrictionId)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						Restriction.class.getSimpleName(),
-						restrictionId
-				));
+				.orElseThrow(() -> new ResourceNotFoundException(Restriction.class, restrictionId));
 
 		List<Restriction> restrictions = supervisor.getSubordinates()
 				.stream()
@@ -118,10 +108,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 		User user = null;
 		if (source.getUserId() != null) {
 			user = userRepository.findById(source.getUserId())
-					.orElseThrow(() -> new ResourceNotFoundException(
-							User.class.getSimpleName(),
-							source.getUserId()
-					));
+					.orElseThrow(() -> new ResourceNotFoundException(User.class, source.getUserId()));
 		}
 		destination.setUser(user);
 	}
@@ -129,7 +116,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 	private void throwIfDuplicate(Long userId, RestrictionType type) {
 		restrictionRepository.findByUserIdAndRestrictionType(userId, type)
 				.ifPresent(restriction -> {
-					throw new DuplicateResourceException(Restriction.class.getSimpleName(),
+					throw new DuplicateResourceException(Restriction.class,
 							"userId and restrictionType",
 							userId + " and " + type.toString());
 				});

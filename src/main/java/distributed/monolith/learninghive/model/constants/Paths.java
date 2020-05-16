@@ -13,11 +13,8 @@ public final class Paths {
 
 	public static final String OBJECTIVE = "/objective";
 
-	public static final String RESTRICTIONS_ADD = "/restriction/add";
-	public static final String RESTRICTIONS_QUERY = "/restriction/q";
-	public static final String RESTRICTIONS_DELETE = "/restriction/delete";
+	public static final String RESTRICTIONS = "/restriction/add";
 	public static final String RESTRICTIONS_COPY = "/restriction/copyToTeam";
-	public static final String RESTRICTIONS_UPDATE = "/restriction/update";
 
 	public static final String USER = "/user";
 	public static final String USER_SUBORDINATES = "/user/subordinates";

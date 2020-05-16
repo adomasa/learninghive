@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static distributed.monolith.learninghive.model.constants.Paths.*;
+import static distributed.monolith.learninghive.model.constants.Paths.RESTRICTIONS;
+import static distributed.monolith.learninghive.model.constants.Paths.RESTRICTIONS_COPY;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class RestrictionController {
 	private final SecurityService securityService;
 
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = RESTRICTIONS_QUERY)
+	@GetMapping(path = RESTRICTIONS)
 	public @ResponseBody
 	List<RestrictionResponse> queryUserRestrictions(@RequestParam(name = "userId", required = false) Long userId,
 	                                                @RequestParam(name = "includeGlobal", required = false) boolean includeGlobal) {
@@ -30,14 +31,14 @@ public class RestrictionController {
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = RESTRICTIONS_ADD)
+	@PostMapping(path = RESTRICTIONS)
 	public @ResponseBody
 	RestrictionResponse createRestriction(@Valid @RequestBody RestrictionRequest restrictionRequest) {
 		return restrictionService.createRestriction(restrictionRequest);
 	}
 
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = RESTRICTIONS_UPDATE)
+	@PutMapping(path = RESTRICTIONS)
 	public @ResponseBody
 	RestrictionResponse updateRestriction(@RequestParam(name = "id") Long id,
 	                                      @Valid @RequestBody RestrictionRequest restrictionRequest) {
@@ -48,12 +49,12 @@ public class RestrictionController {
 	@PostMapping(path = RESTRICTIONS_COPY)
 	public @ResponseBody
 	List<RestrictionResponse> copyRestriction(@RequestParam(name = "supervisorId", required = false) Long supervisorId,
-	                                      @RequestParam(name = "restrictionId") Long restrictionId) {
+	                                          @RequestParam(name = "restrictionId") Long restrictionId) {
 		return restrictionService.copyToTeam(supervisorId == null ?
 				securityService.getLoggedUserId() : supervisorId, restrictionId);
 	}
 
-	@DeleteMapping(path = RESTRICTIONS_DELETE)
+	@DeleteMapping(path = RESTRICTIONS)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteRestriction(@RequestParam(name = "id") Long id) {
 		restrictionService.deleteRestriction(id);

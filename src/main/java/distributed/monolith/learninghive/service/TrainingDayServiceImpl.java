@@ -35,8 +35,6 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	private final RestrictionValidator restrictionValidator;
 	private final RestrictionRepository restrictionRepository;
 	private final ModelMapper modelMapper;
-	private final AuthorityService authorityService;
-
 
 	@Override
 	@Transactional
@@ -96,7 +94,6 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, id));
-
 		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
 		trainingDayRepository.delete(trainingDay);
@@ -126,7 +123,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		trainingDayRepository.findByScheduledDayAndUserId(request.getScheduledDay(), request.getUserId())
 				.ifPresent(trainingDay -> {
 					if (trainingDay.getId() != id) {
-						throw new DuplicateResourceException(TrainingDay.class.getSimpleName(),
+						throw new DuplicateResourceException(TrainingDay.class,
 								"userId and " + "scheduledDay",
 								request.getUserId() + " and " + request.getScheduledDay());
 					}
