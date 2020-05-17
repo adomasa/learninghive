@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -44,6 +45,6 @@ public class User {
 	private User supervisor;
 
 	@OneToMany(mappedBy = "supervisor")
-	private List<User> subordinates;
+	private List<User> subordinates = new ArrayList<>();
 
 }

@@ -27,7 +27,7 @@ public class TopicController {
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = TOPIC)
 	public @ResponseBody
-	List<TopicResponse> search(@RequestParam String titlePart) {
+	List<TopicResponse> searchTopics(@RequestParam String titlePart) {
 		return topicService.searchByTitlePart(titlePart);
 	}
 
@@ -53,7 +53,7 @@ public class TopicController {
 
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = LEARNED_TOPIC)
-	public void createLearnedTopic(@RequestParam("id") Long id) {
+	public void addLearnedTopic(@RequestParam("id") Long id) {
 		learnedTopicService.createLearnedTopic(id, securityService.getLoggedUserId());
 	}
 
