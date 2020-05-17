@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.exception.InsufficientAuthorityException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -21,6 +22,11 @@ public interface AuthorityService {
 	 */
 	boolean isLoggedUserSupervisorOf(@Nullable Long userId);
 
+	boolean isLoggedUserSubordinateOf(@Nullable Long userId);
+
+
+	void validateOriginOneOf(@Nullable Long userId, AuthorityType... types);
+
 	/**
 	 * @param userId target user id, null value means self.
 	 * @throws InsufficientAuthorityException If origin user is not self or does not have admin privileges
@@ -29,7 +35,7 @@ public interface AuthorityService {
 
 	void validateNotSelf(@Nullable Long userId);
 
-	boolean isLoggedUserMatching(Role role);
+	boolean isLoggedUserRole(Role role);
 
 	List<User> findAllSupervisors(@Nullable Long userId);
 

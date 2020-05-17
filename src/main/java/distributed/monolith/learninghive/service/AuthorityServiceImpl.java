@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.exception.InsufficientAuthorityException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.repository.UserRepository;
@@ -38,8 +39,46 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
+	public boolean isLoggedUserSubordinateOf(@Nullable Long userId) {
+		if (userId == null) {
+			return false;
+		}
+
+		var sourceUserId = securityService.getLoggedUserId();
+
+		return findAllSupervisors(sourceUserId).parallelStream()
+				.anyMatch(supervisor -> supervisor.getId() == userId);
+	}
+
+	@Override
+	public void validateOriginOneOf(@Nullable Long userId, AuthorityType... types) {
+		boolean validated = false;
+		for (AuthorityType type : types) {
+			switch (type) {
+				case SELF:
+					validated |= !isNotLoggedUser(userId);
+					break;
+				case SUBORDINATE:
+					validated |= isLoggedUserSubordinateOf(userId);
+					break;
+				case SUPERVISOR:
+					validated |= isLoggedUserSupervisorOf(userId);
+					break;
+				case ADMIN:
+					validated |= isLoggedUserRole(Role.ADMIN);
+					break;
+				default:
+					throw new IllegalStateException("Undefined authorityType: " + type);
+			}
+		}
+		if (!validated) {
+			throw new InsufficientAuthorityException();
+		}
+	}
+
+	@Override
 	public void validateLoggedUserOrAdmin(@Nullable Long userId) throws InsufficientAuthorityException {
-		if (isNotLoggedUser(userId) && !isLoggedUserMatching(Role.ADMIN)) {
+		if (isNotLoggedUser(userId) && !isLoggedUserRole(Role.ADMIN)) {
 			throw new InsufficientAuthorityException();
 		}
 	}
@@ -52,7 +91,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public boolean isLoggedUserMatching(Role role) {
+	public boolean isLoggedUserRole(Role role) {
 		return securityService.getLoggedUserRole() == role;
 	}
 
