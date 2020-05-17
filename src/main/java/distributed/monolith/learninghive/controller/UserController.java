@@ -1,5 +1,6 @@
 package distributed.monolith.learninghive.controller;
 
+import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.AuthorityService;
@@ -32,7 +33,7 @@ public class UserController {
 	@GetMapping(path = USER)
 	public @ResponseBody
 	UserInfo findUserInfo(@RequestParam(name = "id", required = false) Long userId) {
-		authorityService.validateLoggedUserOrSupervisor(userId);
+		authorityService.validateOriginOneOf(userId, AuthorityType.ALL);
 		return userService.getUserInfo(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
