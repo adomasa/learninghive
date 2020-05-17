@@ -6,6 +6,7 @@ import org.hibernate.annotations.OptimisticLockType;
 import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class Topic {
 	private Topic parent;
 
 	@OneToMany(mappedBy = "parent")
-	private List<Topic> children;
+	private List<Topic> children = new ArrayList<>();
 
 	@ManyToMany(mappedBy = "topics")
-	List<TrainingDay> trainingDays;
+	List<TrainingDay> trainingDays = new ArrayList<>();
 }

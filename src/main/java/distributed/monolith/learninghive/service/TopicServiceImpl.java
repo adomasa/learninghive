@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -143,10 +144,10 @@ public class TopicServiceImpl implements TopicService {
 
 	private void validateChildTopicIds(List<Topic> newChildTopicsInDb, List<Long> childTopicIds) {
 		if (newChildTopicsInDb.size() != childTopicIds.size()) {
-			List<Long> presentChildren = newChildTopicsInDb.stream()
+			var presentChildren = newChildTopicsInDb.stream()
 					.map(Topic::getId)
 					.collect(Collectors.toList());
-			List<Long> missingChildren = childTopicIds.stream()
+			var missingChildren = childTopicIds.stream()
 					.filter(id -> !presentChildren.contains(id))
 					.collect(Collectors.toList());
 			throw new ResourceNotFoundException(Topic.class, missingChildren);
@@ -173,9 +174,12 @@ public class TopicServiceImpl implements TopicService {
 
 	private void removeOutdatedParentReferences(Topic parent, List<Long> childTopicIds) {
 		var oldChildTopics = parent.getChildren();
+		if (CollectionUtils.isEmpty(oldChildTopics)) {
+			return;
+		}
 
 		List<Topic> topicsToUpdate;
-		if (childTopicIds == null) {
+		if (CollectionUtils.isEmpty(childTopicIds)) {
 			topicsToUpdate = oldChildTopics;
 		} else {
 			topicsToUpdate = oldChildTopics.stream()
@@ -186,8 +190,9 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	private void removeOutdatedChildReference(Topic target, Long parentId) {
-		if (target.getParent() != null && target.getParent().getId() != parentId) {
-			List<Topic> children = target.getParent().getChildren();
+		var oldParent = target.getParent();
+		if (oldParent != null && oldParent.getId() != parentId) {
+			List<Topic> children = oldParent.getChildren();
 			children.remove(target);
 		}
 	}
