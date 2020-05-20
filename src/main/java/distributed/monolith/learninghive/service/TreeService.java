@@ -4,5 +4,5 @@ import distributed.monolith.learninghive.model.response.TopicTree;
 
 public interface TreeService {
 
-	TopicTree generateTopicTreeInfo();
+	TopicTree generateTopicTreeInfo(long userId);
 }
