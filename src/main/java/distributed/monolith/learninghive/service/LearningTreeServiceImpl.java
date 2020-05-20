@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
 @Service
 @RequiredArgsConstructor
-public class TreeServiceImpl implements TreeService {
+public class LearningTreeServiceImpl implements LearningTreeService {
 	private final LearnedTopicRepository learnedTopicRepository;
 	private final UserRepository userRepository;
 
