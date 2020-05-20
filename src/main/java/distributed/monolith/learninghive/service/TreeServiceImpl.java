@@ -2,8 +2,11 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.LearnedTopic;
 import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.response.TopicTree;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
+import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,29 +21,49 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TreeServiceImpl implements TreeService {
 	private final LearnedTopicRepository learnedTopicRepository;
+	private final UserRepository userRepository;
 
 	@Override
-	public TopicTree generateTopicTreeInfo(long userId) {
-		//Get topics that are already learned by the user
+	public TopicTree generateUserTree(long userId) {
 		Set<Topic> learntTopics = learnedTopicRepository.findByUserId(userId)
 				.stream()
 				.map(LearnedTopic::getTopic)
 				.collect(Collectors.toSet());
 
-		//Get learned topics with parents
+		return getTopicTree(learntTopics);
+	}
+
+	@Override
+	public TopicTree generateSubordinateTree(long userId) {
+		var user = userRepository.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						User.class,
+						userId
+				));
+
+		Set<Topic> learntTopics = new HashSet<>();
+		for (User subordinate : user.getSubordinates()) {
+			learntTopics.addAll(learnedTopicRepository.findByUserId(subordinate.getId())
+					.stream()
+					.map(LearnedTopic::getTopic)
+					.collect(Collectors.toSet()));
+		}
+
+		return getTopicTree(learntTopics);
+	}
+
+	private TopicTree getTopicTree(Set<Topic> learntTopics) {
 		Set<Topic> learntTopicsWithParents = new HashSet<>(learntTopics);
+
 		for (Topic learntTopic : learntTopics) {
 			addNodesParents(learntTopic, learntTopicsWithParents);
 		}
 
-		//Find top nodes with no parents
 		Set<Topic> topNodes = findTopicsWithNoParents(learntTopicsWithParents);
 
-		//Create root node
 		TopicTree topicTreeRoot = new TopicTree();
 		topicTreeRoot.setName("Topics");
 
-		//Populate root node
 		for (Topic topic : topNodes) {
 			TopicTree topicTreeNode = new TopicTree();
 			topicTreeNode.setName(topic.getTitle());

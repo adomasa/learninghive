@@ -27,7 +27,8 @@ public final class Paths {
 	public static final String STATS_SUBORDINATES = "/stats/subordinates";
 	public static final String STATS_PROGRESS = "/stats/progress";
 
-	public static final String TREE_TOPICS = "/tree/topics";
+	public static final String TREE_USER = "/tree/user";
+	public static final String TREE_SUBORDINATES = "/tree/subordinates";
 
 	private Paths() {
 	}
