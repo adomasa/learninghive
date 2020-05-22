@@ -26,8 +26,12 @@ public class RestrictionServiceImpl implements RestrictionService {
 	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
+	private final AuthorityService authorityService;
+
 	@Override
 	public RestrictionResponse createRestriction(RestrictionRequest restrictionRequest) {
+		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
+
 		throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 
 		Restriction restriction = new Restriction();
@@ -38,10 +42,14 @@ public class RestrictionServiceImpl implements RestrictionService {
 
 	@Override
 	public RestrictionResponse updateRestriction(Long id, RestrictionRequest restrictionRequest) {
+		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
+
 		Restriction restriction = restrictionRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Restriction.class, id));
 
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
+		validateHasAccessToManageRestrictions(userId);
+
 		if (userId != restrictionRequest.getUserId() ||
 				restriction.getRestrictionType() != restrictionRequest.getRestrictionType()) {
 			throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
@@ -67,6 +75,9 @@ public class RestrictionServiceImpl implements RestrictionService {
 		Restriction restriction = restrictionRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
+
+		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
+		validateHasAccessToManageRestrictions(userId);
 
 		restrictionRepository.delete(restriction);
 	}
@@ -120,5 +131,13 @@ public class RestrictionServiceImpl implements RestrictionService {
 							"userId and restrictionType",
 							userId + " and " + type.toString());
 				});
+	}
+
+	private void validateHasAccessToManageRestrictions(Long targetUserId) {
+		if (targetUserId == null) {
+			authorityService.validateLoggedUserIsAdmin();
+		} else {
+			authorityService.validateLoggedUserIsSupervisor(targetUserId);
+		}
 	}
 }

@@ -129,4 +129,18 @@ public class AuthorityServiceImpl implements AuthorityService {
 			throw new InsufficientAuthorityException();
 		}
 	}
+
+	@Override
+	public void validateLoggedUserIsAdmin() throws InsufficientAuthorityException {
+		if (!isLoggedUserRole(Role.ADMIN)) {
+			throw new InsufficientAuthorityException();
+		}
+	}
+
+	@Override
+	public void validateLoggedUserIsSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException {
+		if (!isLoggedUserSupervisorOf(targetUserId)) {
+			throw new InsufficientAuthorityException();
+		}
+	}
 }

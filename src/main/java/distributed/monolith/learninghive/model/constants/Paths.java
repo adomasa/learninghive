@@ -13,7 +13,7 @@ public final class Paths {
 
 	public static final String OBJECTIVE = "/objective";
 
-	public static final String RESTRICTIONS = "/restriction/add";
+	public static final String RESTRICTIONS = "/restriction";
 	public static final String RESTRICTIONS_COPY = "/restriction/copyToTeam";
 
 	public static final String USER = "/user";

@@ -51,4 +51,8 @@ public interface AuthorityService {
 	 *                                        than targetUserId
 	 */
 	void validateLoggedUserOrSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException;
+
+	void validateLoggedUserIsAdmin() throws InsufficientAuthorityException;
+
+	void validateLoggedUserIsSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException;
 }
