@@ -1,10 +1,7 @@
 package distributed.monolith.learninghive.model.exception;
 
 import distributed.monolith.learninghive.domain.Restriction;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.CONFLICT)
 public class RestrictionViolationException extends RuntimeException {
 	private static final long serialVersionUID = 6323247181384781046L;
 
