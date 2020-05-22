@@ -7,10 +7,12 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.stereotype.Component;
 
 @Aspect
 @EnableAspectJAutoProxy
 @RequiredArgsConstructor
+@Component
 public class LoggingAspect {
 	private final Logger logger;
 	private final SecurityService securityService;
