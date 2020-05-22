@@ -22,15 +22,15 @@ public class LoggingAspect {
 		var calledMethod = String.format("%s.%s", joinPoint.getTarget().getClass().getSimpleName(),
 				joinPoint.getSignature().getName());
 
-		if (userId != null) {
+		if (userId == null) {
+			logger.log(String.format("Not logged in user called method %s", calledMethod));
+		} else {
 			var userInfo = userService.getUserInfo(userId);
 			var username = String.format("%s %s", userInfo.getName(), userInfo.getSurname());
 			var role = securityService.getLoggedUserRole().toString();
 
 			logger.log(String.format("User %s (%d) with role %s called method %s",
 					username, userId, role, calledMethod));
-		} else {
-			logger.log(String.format("Not logged in user called method %s", calledMethod));
 		}
 	}
 }

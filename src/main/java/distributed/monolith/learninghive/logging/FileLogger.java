@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 
 @Component
@@ -19,15 +21,14 @@ public class FileLogger implements Logger {
 	public void log(String message) {
 		try {
 			if (writer == null) {
-				writer = new BufferedWriter(new FileWriter(fileName, true));
+				writer = Files.newBufferedWriter(Paths.get(fileName),
+						StandardOpenOption.APPEND, StandardOpenOption.CREATE);
 			}
 
 			writer.write(String.format("%s: %s\n", new Timestamp(System.currentTimeMillis()), message));
 			writer.flush();
-
 		} catch (IOException e) {
-			System.out.printf("Failed to log message to file");
-			e.printStackTrace();
+			System.out.println(String.format("Failed to log message to file: %s",  e.getMessage()));
 		}
 	}
 }
