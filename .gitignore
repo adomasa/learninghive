@@ -32,3 +32,4 @@ out/
 .vscode/
 
 src/main/resources/application-local.yml
+learningHive.log

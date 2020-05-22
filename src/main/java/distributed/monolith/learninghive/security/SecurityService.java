@@ -3,7 +3,7 @@ package distributed.monolith.learninghive.security;
 import distributed.monolith.learninghive.domain.Role;
 
 public interface SecurityService {
-	long getLoggedUserId();
+	Long getLoggedUserId();
 
 	/**
 	 * Only one role per user

@@ -24,4 +24,6 @@
             </bean>
         </constructor-arg>
     </bean>
+
+    <bean class="distributed.monolith.learninghive.logging.LoggingAspect"/>
 </beans>
