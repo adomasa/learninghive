@@ -1,6 +1,5 @@
 package distributed.monolith.learninghive.controller;
 
-import distributed.monolith.learninghive.model.exception.RestrictionViolationException;
 import distributed.monolith.learninghive.model.request.TrainingDayRequest;
 import distributed.monolith.learninghive.model.response.TrainingDayResponse;
 import distributed.monolith.learninghive.security.SecurityService;
@@ -8,7 +7,6 @@ import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.TrainingDayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,8 +22,6 @@ public class TrainingDayController {
 	private final SecurityService securityService;
 	private final AuthorityService authorityService;
 
-	private static int restrictionViolatedStatus = 432;
-
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = TRAINING_DAY)
 	public @ResponseBody
@@ -34,33 +30,22 @@ public class TrainingDayController {
 		return trainingDayService.queryTrainingDays(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
+	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = TRAINING_DAY)
 	public @ResponseBody
-	ResponseEntity addTrainingDay(@Valid @RequestBody TrainingDayRequest trainingDayRequest) {
+	TrainingDayResponse addTrainingDay(@Valid @RequestBody TrainingDayRequest trainingDayRequest) {
 		authorityService.validateLoggedUserOrSupervisor(trainingDayRequest.getUserId());
 		setUserId(trainingDayRequest);
-		ResponseEntity response;
-		try {
-			response = new ResponseEntity(trainingDayService.addTrainingDay(trainingDayRequest), HttpStatus.OK);
-		} catch (RestrictionViolationException ex) {
-			response = ResponseEntity.status(restrictionViolatedStatus).body(ex.getMessage());
-		}
-		return response;
+		return trainingDayService.addTrainingDay(trainingDayRequest);
 	}
 
+	@ResponseStatus(HttpStatus.OK)
 	@PutMapping(path = TRAINING_DAY)
-	public ResponseEntity updateTrainingDay(@RequestParam(name = "id") Long id,
+	public TrainingDayResponse updateTrainingDay(@RequestParam(name = "id") Long id,
 	                                             @Valid @RequestBody TrainingDayRequest trainingDayRequest) {
 		authorityService.validateLoggedUserOrSupervisor(trainingDayRequest.getUserId());
 		setUserId(trainingDayRequest);
-		ResponseEntity response;
-		try {
-			response = new ResponseEntity(trainingDayService.updateTrainingDay(id, trainingDayRequest),
-					HttpStatus.OK);
-		} catch (RestrictionViolationException ex) {
-			response = ResponseEntity.status(restrictionViolatedStatus).body(ex.getMessage());
-		}
-		return response;
+		return trainingDayService.updateTrainingDay(id, trainingDayRequest);
 	}
 
 	@DeleteMapping(path = TRAINING_DAY)
