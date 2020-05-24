@@ -178,7 +178,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public void updateUserSupervisor(long supervisorId, long subordinateId) {
-		authorityService.validateNotSelf(subordinateId);
+		authorityService.validateLoggedUserSupervisorOf(subordinateId);
 
 		var userSupervisor = userRepository.findById(supervisorId)
 				.orElseThrow(() -> new ResourceNotFoundException(User.class, supervisorId));

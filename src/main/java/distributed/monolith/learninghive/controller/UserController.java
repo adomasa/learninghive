@@ -48,7 +48,7 @@ public class UserController {
 
 	@PostMapping(path = USER_SUPERVISOR)
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("hasAuthority('ADMIN')")
+	@PreAuthorize("hasAnyAuthority('SUPERVISOR', 'ADMIN')")
 	public void updateUserSupervisor(@RequestParam(name = "supervisorId") Long supervisorId,
 	                                 @RequestParam(name = "subordinateId") Long subordinateId) {
 		userService.updateUserSupervisor(supervisorId, subordinateId);
