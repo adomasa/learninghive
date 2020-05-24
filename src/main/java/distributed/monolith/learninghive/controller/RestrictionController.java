@@ -4,6 +4,7 @@ package distributed.monolith.learninghive.controller;
 import distributed.monolith.learninghive.model.request.RestrictionRequest;
 import distributed.monolith.learninghive.model.response.RestrictionResponse;
 import distributed.monolith.learninghive.security.SecurityService;
+import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.RestrictionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,14 @@ import static distributed.monolith.learninghive.model.constants.Paths.RESTRICTIO
 public class RestrictionController {
 	private final RestrictionService restrictionService;
 	private final SecurityService securityService;
+	private final AuthorityService authorityService;
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = RESTRICTIONS)
 	public @ResponseBody
 	List<RestrictionResponse> queryUserRestrictions(@RequestParam(name = "userId", required = false) Long userId,
 	                                                @RequestParam(name = "includeGlobal", required = false) boolean includeGlobal) {
+		authorityService.validateLoggedUserOrSupervisor(userId);
 		return restrictionService.findByUserId(userId == null ?
 				securityService.getLoggedUserId() : userId, includeGlobal);
 	}
@@ -50,6 +53,7 @@ public class RestrictionController {
 	public @ResponseBody
 	List<RestrictionResponse> copyRestriction(@RequestParam(name = "supervisorId", required = false) Long supervisorId,
 	                                          @RequestParam(name = "restrictionId") Long restrictionId) {
+		authorityService.validateLoggedUserOrSupervisor(supervisorId);
 		return restrictionService.copyToTeam(supervisorId == null ?
 				securityService.getLoggedUserId() : supervisorId, restrictionId);
 	}
