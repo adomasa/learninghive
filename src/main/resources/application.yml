@@ -28,3 +28,6 @@ email:
   username:
   password:
   host: smtp.gmail.com
+
+logging:
+  logFile: "learningHive.log"

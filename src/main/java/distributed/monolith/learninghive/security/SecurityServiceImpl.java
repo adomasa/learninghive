@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SecurityServiceImpl implements SecurityService {
-
 	@Override
-	public long getLoggedUserId() {
-		var authentication =
-				(JwtAuthentication) SecurityContextHolder.getContext().getAuthentication();
-		return authentication.getUserId();
+	public Long getLoggedUserId() {
+		var authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication instanceof JwtAuthentication) {
+			return ((JwtAuthentication) authentication).getUserId();
+		}
+
+		return null;
 	}
 
 	@Override
