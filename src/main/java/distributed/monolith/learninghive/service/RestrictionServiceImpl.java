@@ -30,9 +30,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 
 	@Override
 	public RestrictionResponse createRestriction(RestrictionRequest restrictionRequest) {
-		authorityService.validateLoggedUserSupervisorOf(restrictionRequest.getUserId());
 		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
-
 		validateNotDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 
 		Restriction restriction = new Restriction();
@@ -45,13 +43,8 @@ public class RestrictionServiceImpl implements RestrictionService {
 	public RestrictionResponse updateRestriction(Long id, RestrictionRequest restrictionRequest) {
 		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
 
-		authorityService.validateLoggedUserSupervisorOf(restrictionRequest.getUserId());
-
 		Restriction restriction = restrictionRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Restriction.class, id));
-		if (restriction.getUser() != null) {
-			authorityService.validateLoggedUserSupervisorOf(restriction.getUser().getId());
-		}
 
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
@@ -87,9 +80,6 @@ public class RestrictionServiceImpl implements RestrictionService {
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
 
-		if (restriction.getUser() != null) {
-			authorityService.validateLoggedUserSupervisorOf(restriction.getUser().getId());
-		}
 		restrictionRepository.delete(restriction);
 	}
 
