@@ -1,9 +1,7 @@
 package distributed.monolith.learninghive.controller;
 
-import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.response.UserInfo;
 import distributed.monolith.learninghive.security.SecurityService;
-import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,13 +17,11 @@ import static distributed.monolith.learninghive.model.constants.Paths.*;
 public class UserController {
 
 	private final UserService userService;
-	private final AuthorityService authorityService;
 	private final SecurityService securityService;
 
 	@DeleteMapping(path = USER)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteUser(@RequestParam(name = "id", required = false) long userId) {
-		authorityService.validateLoggedUserOrAdmin(userId);
 		userService.delete(userId);
 	}
 
@@ -33,7 +29,6 @@ public class UserController {
 	@GetMapping(path = USER)
 	public @ResponseBody
 	UserInfo findUserInfo(@RequestParam(name = "id", required = false) Long userId) {
-		authorityService.validateOriginOneOf(userId, AuthorityType.ALL);
 		return userService.getUserInfo(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
@@ -41,7 +36,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	List<UserInfo> findUserSubordinates(@RequestParam(name = "id", required = false) Long userId) {
-		authorityService.validateLoggedUserOrSupervisor(userId);
 		return userService.getUserSubordinates(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
@@ -49,7 +43,6 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	List<UserInfo> findTeamMembers(@RequestParam(name = "userId", required = false) Long userId) {
-		authorityService.validateLoggedUserOrSupervisor(userId);
 		return userService.findTeamMembers(userId == null ? securityService.getLoggedUserId() : userId);
 	}
 
@@ -58,7 +51,6 @@ public class UserController {
 	@PreAuthorize("hasAuthority('ADMIN')")
 	public void updateUserSupervisor(@RequestParam(name = "supervisorId") Long supervisorId,
 	                                 @RequestParam(name = "subordinateId") Long subordinateId) {
-		authorityService.validateNotSelf(subordinateId);
 		userService.updateUserSupervisor(supervisorId, subordinateId);
 	}
 }

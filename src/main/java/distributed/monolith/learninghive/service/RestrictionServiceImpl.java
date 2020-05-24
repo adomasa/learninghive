@@ -30,9 +30,10 @@ public class RestrictionServiceImpl implements RestrictionService {
 
 	@Override
 	public RestrictionResponse createRestriction(RestrictionRequest restrictionRequest) {
+		authorityService.validateLoggedUserSupervisorOf(restrictionRequest.getUserId());
 		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
 
-		throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
+		validateNotDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 
 		Restriction restriction = new Restriction();
 		mountEntity(restriction, restrictionRequest);
@@ -44,15 +45,20 @@ public class RestrictionServiceImpl implements RestrictionService {
 	public RestrictionResponse updateRestriction(Long id, RestrictionRequest restrictionRequest) {
 		validateHasAccessToManageRestrictions(restrictionRequest.getUserId());
 
+		authorityService.validateLoggedUserSupervisorOf(restrictionRequest.getUserId());
+
 		Restriction restriction = restrictionRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Restriction.class, id));
+		if (restriction.getUser() != null) {
+			authorityService.validateLoggedUserSupervisorOf(restriction.getUser().getId());
+		}
 
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
 
 		if (userId != restrictionRequest.getUserId() ||
 				restriction.getRestrictionType() != restrictionRequest.getRestrictionType()) {
-			throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
+			validateNotDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 		}
 
 		mountEntity(restriction, restrictionRequest);
@@ -61,6 +67,8 @@ public class RestrictionServiceImpl implements RestrictionService {
 
 	@Override
 	public List<RestrictionResponse> findByUserId(Long userId, boolean includeGlobal) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		List<Restriction> restrictions = includeGlobal ?
 				restrictionRepository.findByUserIdOrUserIdIsNull(userId) :
 				restrictionRepository.findByUserId(userId);
@@ -79,12 +87,16 @@ public class RestrictionServiceImpl implements RestrictionService {
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
 
+		if (restriction.getUser() != null) {
+			authorityService.validateLoggedUserSupervisorOf(restriction.getUser().getId());
+		}
 		restrictionRepository.delete(restriction);
 	}
 
 	@Override
 	@Transactional
 	public List<RestrictionResponse> copyToTeam(Long supervisorId, Long restrictionId) {
+		authorityService.validateLoggedUserOrSupervisorOf(supervisorId);
 		User supervisor = userRepository.findById(supervisorId)
 				.orElseThrow(() -> new ResourceNotFoundException(User.class, supervisorId));
 		Restriction sourceRestriction = restrictionRepository.findById(restrictionId)
@@ -124,7 +136,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 		destination.setUser(user);
 	}
 
-	private void throwIfDuplicate(Long userId, RestrictionType type) {
+	private void validateNotDuplicate(Long userId, RestrictionType type) {
 		restrictionRepository.findByUserIdAndRestrictionType(userId, type)
 				.ifPresent(restriction -> {
 					throw new DuplicateResourceException(Restriction.class,
@@ -137,7 +149,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 		if (targetUserId == null) {
 			authorityService.validateLoggedUserIsAdmin();
 		} else {
-			authorityService.validateLoggedUserIsSupervisor(targetUserId);
+			authorityService.validateLoggedUserIsSupervisorOf(targetUserId);
 		}
 	}
 }

@@ -3,6 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.exception.*;
 import distributed.monolith.learninghive.model.exception.InvalidTokenException.Type;
 import distributed.monolith.learninghive.model.request.UserInvitation;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
 	private final TrainingDayRepository trainingDayRepository;
 
 	private final SecurityService securityService;
+	private final AuthorityService authorityService;
 
 	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper modelMapper;
@@ -54,6 +56,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public void delete(long userId) {
+		authorityService.validateLoggedUserOrAdmin(userId);
+
 		var user = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class,
@@ -128,6 +132,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserInfo getUserInfo(long userId) {
+		authorityService.validateOriginOneOf(userId, AuthorityType.ALL);
+
 		return userRepository.findById(userId)
 				.map(user -> modelMapper.map(user, UserInfo.class))
 				.orElseThrow(() -> new ResourceNotFoundException(
@@ -138,6 +144,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserInfo> getUserSubordinates(long userId) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		return userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(User.class, userId))
 				.getSubordinates()
@@ -148,6 +156,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserInfo> findTeamMembers(long userId) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		if (securityService.getLoggedUserRole() == Role.ADMIN) {
 			return Collections.emptyList();
 		}
@@ -168,6 +178,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public void updateUserSupervisor(long supervisorId, long subordinateId) {
+		authorityService.validateNotSelf(subordinateId);
+
 		var userSupervisor = userRepository.findById(supervisorId)
 				.orElseThrow(() -> new ResourceNotFoundException(User.class, supervisorId));
 
