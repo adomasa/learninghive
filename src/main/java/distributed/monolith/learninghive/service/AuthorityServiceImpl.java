@@ -116,7 +116,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 	@Override
 	public void validateLoggedUserSupervisorOf(Long userId) {
-		if (isLoggedUserSupervisorOf(userId)) {
+		if (!isLoggedUserSupervisorOf(userId)) {
 			throw new InsufficientAuthorityException();
 		}
 	}
