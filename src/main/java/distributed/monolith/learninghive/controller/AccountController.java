@@ -10,7 +10,6 @@ import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.AccountService;
-import distributed.monolith.learninghive.service.AuthorityService;
 import distributed.monolith.learninghive.service.EmailService;
 import distributed.monolith.learninghive.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ public class AccountController {
 	private final AccountService accountService;
 	private final UserService userService;
 	private final SecurityService securityService;
-	private final AuthorityService authorityService;
 
 	private final EmailService emailService;
 
@@ -60,7 +58,6 @@ public class AccountController {
 	@ResponseStatus(HttpStatus.OK)
 	public void updateAccount(@RequestParam(name = "id", required = false) Long userId,
 	                          @Valid @RequestBody UserRequest userRequest) {
-		authorityService.validateLoggedUserOrAdmin(userId);
 		accountService.updateAccountData(userId == null ? securityService.getLoggedUserId() : userId, userRequest);
 	}
 

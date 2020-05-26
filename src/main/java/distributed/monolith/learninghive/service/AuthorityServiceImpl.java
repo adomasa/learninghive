@@ -8,7 +8,6 @@ import distributed.monolith.learninghive.model.exception.ResourceNotFoundExcepti
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.SecurityService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
@@ -116,15 +115,14 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public void validateLoggedUserOrSupervisor(@NonNull User owner) throws InsufficientAuthorityException {
-		var ownerId = owner.getId();
-		if (isNotLoggedUser(ownerId) && isLoggedUserSupervisorOf(ownerId)) {
+	public void validateLoggedUserSupervisorOf(Long userId) {
+		if (!isLoggedUserSupervisorOf(userId)) {
 			throw new InsufficientAuthorityException();
 		}
 	}
 
 	@Override
-	public void validateLoggedUserOrSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException {
+	public void validateLoggedUserOrSupervisorOf(@Nullable Long targetUserId) throws InsufficientAuthorityException {
 		if (isNotLoggedUser(targetUserId) && !isLoggedUserSupervisorOf(targetUserId)) {
 			throw new InsufficientAuthorityException();
 		}
@@ -138,7 +136,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 	}
 
 	@Override
-	public void validateLoggedUserIsSupervisor(@Nullable Long targetUserId) throws InsufficientAuthorityException {
+	public void validateLoggedUserIsSupervisorOf(@Nullable Long targetUserId) throws InsufficientAuthorityException {
 		if (!isLoggedUserSupervisorOf(targetUserId)) {
 			throw new InsufficientAuthorityException();
 		}

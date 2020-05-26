@@ -37,9 +37,12 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	private final RestrictionRepository restrictionRepository;
 	private final ModelMapper modelMapper;
 
+	private final AuthorityService authorityService;
+
 	@Override
 	@Transactional
 	public TrainingDayResponse addTrainingDay(TrainingDayRequest trainingDayRequest) {
+		authorityService.validateLoggedUserOrSupervisorOf(trainingDayRequest.getUserId());
 		// second parameter is only important when updating existing entity
 		throwIfDuplicate(trainingDayRequest, -1L);
 		throwIfPastDate(trainingDayRequest.getScheduledDay());
@@ -55,6 +58,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	@Override
 	@Transactional
 	public TrainingDayResponse updateTrainingDay(long trainingDayId, TrainingDayRequest trainingDayRequest) {
+		authorityService.validateLoggedUserOrSupervisorOf(trainingDayRequest.getUserId());
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(trainingDayId)
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, trainingDayId));
@@ -81,6 +85,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<TrainingDayResponse> queryTrainingDays(long userId) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		return trainingDayRepository.findByUserId(userId)
 				.parallelStream()
 				.map(t -> modelMapper.map(t, TrainingDayResponse.class))

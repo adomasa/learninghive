@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,6 +46,7 @@ public class User {
 	private User supervisor;
 
 	@OneToMany(mappedBy = "supervisor")
+	@Builder.Default
 	private List<User> subordinates = new ArrayList<>();
 
 }

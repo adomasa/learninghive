@@ -23,10 +23,12 @@ public class LearnedTopicServiceImpl implements LearnedTopicService {
 	private final LearnedTopicRepository learnedTopicRepository;
 	private final UserRepository userRepository;
 	private final ObjectiveRepository objectiveRepository;
+	private final AuthorityService authorityService;
 
 	@Override
 	@Transactional
 	public void createLearnedTopic(long topicId, long userId) {
+		authorityService.validateLoggedUserOrAdmin(userId);
 		objectiveRepository.deleteByUserIdAndTopicId(userId, topicId);
 
 		if (learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isPresent()) {
@@ -47,12 +49,16 @@ public class LearnedTopicServiceImpl implements LearnedTopicService {
 
 	@Override
 	public void deleteLearnedTopic(long topicId, long userId) {
+		authorityService.validateLoggedUserOrAdmin(userId);
+
 		learnedTopicRepository.findByUserIdAndTopicId(userId, topicId)
 				.ifPresent(learnedTopicRepository::delete);
 	}
 
 	@Override
 	public LearnedTopicsResponse findLearnedTopics(long userId) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		LearnedTopicsResponse response = new LearnedTopicsResponse();
 		response.setTopics(learnedTopicRepository.findByUserId(userId)
 				.stream()
