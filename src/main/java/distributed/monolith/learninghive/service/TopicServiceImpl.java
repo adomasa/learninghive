@@ -106,6 +106,7 @@ public class TopicServiceImpl implements TopicService {
 	private void mountEntity(Topic destination, TopicRequest source) {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
+		destination.setVersion(source.getVersion());
 
 		mountChildren(destination, source.getChildrenId());
 		mountParent(destination, source.getParentId());

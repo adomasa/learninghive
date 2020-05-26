@@ -50,7 +50,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
 
-		if (userId != restrictionRequest.getUserId() ||
+		if (restrictionRequest.getUserId().equals(userId) ||
 				restriction.getRestrictionType() != restrictionRequest.getRestrictionType()) {
 			throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 		}
@@ -122,6 +122,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 					.orElseThrow(() -> new ResourceNotFoundException(User.class, source.getUserId()));
 		}
 		destination.setUser(user);
+		destination.setVersion(source.getVersion());
 	}
 
 	private void throwIfDuplicate(Long userId, RestrictionType type) {

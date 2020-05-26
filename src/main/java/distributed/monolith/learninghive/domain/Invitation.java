@@ -35,4 +35,7 @@ public class Invitation {
 	@NonNull
 	@ManyToOne
 	private User userWhoInvited;
+
+	@Version
+	private int version;
 }

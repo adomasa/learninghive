@@ -3,14 +3,11 @@ package distributed.monolith.learninghive.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 @Getter
 @Setter
 @Table(name = "learned_topic", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "topic_id"}))

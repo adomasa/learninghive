@@ -38,7 +38,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
 
-		// todo is there any point to allow updating user or topic
 		mountEntity(objective, objectiveRequest);
 
 		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
@@ -106,5 +105,6 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 						)
 				);
 		destination.setUser(user);
+		destination.setVersion(source.getVersion());
 	}
 }

@@ -62,14 +62,9 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
 		// todo should only be able to edit description
-
-		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
-		//	throw new ChangingPastTrainingDayException();
-		//}
 		LocalDate oldTrainingDayDate = trainingDay.getScheduledDay().toLocalDate();
 		mountEntity(trainingDay, trainingDayRequest);
 
-		// Compare strings to compare only date without time
 		if (!oldTrainingDayDate.equals(trainingDayRequest.getScheduledDay().toLocalDate())) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
 					trainingDay.getUser().getId());
@@ -103,6 +98,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		destination.setTitle(source.getTitle());
 		destination.setDescription(source.getDescription());
 		destination.setScheduledDay(source.getScheduledDay());
+		destination.setVersion(source.getVersion());
 
 		User user = userRepository
 				.findById(source.getUserId())

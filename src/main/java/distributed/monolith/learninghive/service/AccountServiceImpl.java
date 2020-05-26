@@ -87,8 +87,9 @@ public class AccountServiceImpl implements AccountService {
 		userToUpdate.setName(userRequest.getName());
 		userToUpdate.setSurname(userRequest.getSurname());
 		userToUpdate.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+		userToUpdate.setVersion(userRequest.getVersion());
 
-		userRepository.save(userToUpdate);
+		userRepository.save(userToUpdate); //todo may throw Optimistic Locking exception
 	}
 
 	/**

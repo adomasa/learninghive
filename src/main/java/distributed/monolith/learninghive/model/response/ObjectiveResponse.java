@@ -6,10 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.request.VersionedResourceRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class ObjectiveResponse {
+@EqualsAndHashCode(callSuper = true)
+public class ObjectiveResponse extends VersionedResourceRequest {
 	long id;
 
 	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")

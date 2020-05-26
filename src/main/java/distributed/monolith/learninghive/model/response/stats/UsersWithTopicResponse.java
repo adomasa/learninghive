@@ -1,4 +1,4 @@
-package distributed.monolith.learninghive.model.response;
+package distributed.monolith.learninghive.model.response.stats;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
