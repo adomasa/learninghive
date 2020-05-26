@@ -34,10 +34,11 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 	@Override
 	public ObjectiveResponse updateObjective(long id, ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisorOf(objectiveRequest.getUserId());
 		var objective = objectiveRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
 
-		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
+		authorityService.validateLoggedUserOrSupervisorOf(objective.getUser().getId());
 
 		mountEntity(objective, objectiveRequest);
 
@@ -57,6 +58,8 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 	@Override
 	public ObjectiveResponse addObjective(ObjectiveRequest objectiveRequest) {
+		authorityService.validateLoggedUserOrSupervisorOf(objectiveRequest.getUserId());
+
 		if (objectiveRepository.findByUserIdAndTopicId(
 				objectiveRequest.getUserId(), objectiveRequest.getTopicId()) != null) {
 			throw new DuplicateResourceException(Objective.class,
@@ -76,7 +79,7 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 		var objective = objectiveRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Objective.class, id));
-		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
+		authorityService.validateLoggedUserOrSupervisorOf(objective.getUser().getId());
 
 		objectiveRepository.delete(objective);
 	}
@@ -85,6 +88,8 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 	@Transactional(readOnly = true)
 	@Override
 	public List<ObjectiveResponse> findByUserId(long userId) {
+		authorityService.validateLoggedUserOrSupervisorOf(userId);
+
 		return objectiveRepository.findByUserId(userId)
 				.parallelStream()
 				.map(o -> modelMapper.map(o, ObjectiveResponse.class))

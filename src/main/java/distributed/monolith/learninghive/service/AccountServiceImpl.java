@@ -25,6 +25,7 @@ public class AccountServiceImpl implements AccountService {
 	private final UserRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final AuthorityService authorityService;
 
 	private final AuthTokenProvider authTokenProvider;
 
@@ -78,6 +79,8 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public void updateAccountData(Long userId, UserRequest userRequest) {
+		authorityService.validateLoggedUserOrAdmin(userId);
+
 		var userToUpdate = userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException(
 						User.class,

@@ -9,6 +9,6 @@ public class ChangingPastTrainingDayException extends RuntimeException {
 	private static final long serialVersionUID = -6863445203578777368L;
 
 	public ChangingPastTrainingDayException() {
-		super("Cannot make changes to training day that is in the past or present");
+		super("Can only change description of training day that is in the past");
 	}
 }
