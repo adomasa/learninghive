@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import distributed.monolith.learninghive.domain.Topic;
+import distributed.monolith.learninghive.model.request.VersionedResourceRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
-public class TopicResponse {
+@EqualsAndHashCode(callSuper = true)
+public class TopicResponse extends VersionedResourceRequest {
 	long id;
 	String title;
 	String content;

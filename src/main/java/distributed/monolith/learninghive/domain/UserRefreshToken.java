@@ -1,6 +1,5 @@
 package distributed.monolith.learninghive.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,7 +21,6 @@ public class UserRefreshToken {
 
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(nullable = false, unique = true)
-	@JsonIgnore
 	@NonNull
 	private User user;
 

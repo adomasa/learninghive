@@ -1,6 +1,6 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.model.response.TopicTree;
+import distributed.monolith.learninghive.model.response.stats.TopicTree;
 
 public interface LearningTreeService {
 

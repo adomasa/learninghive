@@ -1,8 +1,8 @@
 package distributed.monolith.learninghive.service;
 
-import distributed.monolith.learninghive.model.response.ProgressResponse;
-import distributed.monolith.learninghive.model.response.SubordinatesWithSubCount;
-import distributed.monolith.learninghive.model.response.UsersWithTopicResponse;
+import distributed.monolith.learninghive.model.response.stats.ProgressResponse;
+import distributed.monolith.learninghive.model.response.stats.SubordinatesWithSubCount;
+import distributed.monolith.learninghive.model.response.stats.UsersWithTopicResponse;
 
 import java.util.List;
 

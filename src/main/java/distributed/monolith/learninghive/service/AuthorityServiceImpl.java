@@ -23,7 +23,7 @@ public class AuthorityServiceImpl implements AuthorityService {
 
 	@Override
 	public boolean isNotLoggedUser(@Nullable Long userId) {
-		return userId != null && securityService.getLoggedUserId() != userId;
+		return userId != null && securityService.getLoggedUserId().longValue() != userId.longValue();
 	}
 
 	@Override

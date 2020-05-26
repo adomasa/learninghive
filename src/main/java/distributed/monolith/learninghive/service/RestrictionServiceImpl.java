@@ -11,6 +11,7 @@ import distributed.monolith.learninghive.model.response.RestrictionResponse;
 import distributed.monolith.learninghive.repository.RestrictionRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.restrictions.RestrictionType;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -49,11 +50,12 @@ public class RestrictionServiceImpl implements RestrictionService {
 		Long userId = restriction.getUser() == null ? null : restriction.getUser().getId();
 		validateHasAccessToManageRestrictions(userId);
 
-		if (userId != restrictionRequest.getUserId() ||
+		if (restrictionRequest.getUserId().equals(userId) ||
 				restriction.getRestrictionType() != restrictionRequest.getRestrictionType()) {
 			validateNotDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 		}
 
+		ValidatorUtil.validateResourceVersions(restriction, restrictionRequest);
 		mountEntity(restriction, restrictionRequest);
 		return modelMapper.map(restrictionRepository.save(restriction), RestrictionResponse.class);
 	}

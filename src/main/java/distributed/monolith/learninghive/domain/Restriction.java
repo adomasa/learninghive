@@ -4,18 +4,15 @@ import distributed.monolith.learninghive.restrictions.RestrictionType;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 @Getter
 @Setter
 @Table(name = "restrictions", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "restriction_type"}))
-public class Restriction {
+public class Restriction implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -32,4 +29,7 @@ public class Restriction {
 
 	@CreationTimestamp
 	private Date date;
+
+	@Version
+	private Integer version;
 }

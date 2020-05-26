@@ -13,7 +13,7 @@ import java.util.Date;
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class Invitation {
+public class Invitation implements VersionedEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,4 +35,7 @@ public class Invitation {
 	@NonNull
 	@ManyToOne
 	private User userWhoInvited;
+
+	@Version
+	private Integer version;
 }

@@ -11,6 +11,7 @@ import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.SecurityService;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,9 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 
 		authorityService.validateLoggedUserOrSupervisorOf(objective.getUser().getId());
 
-		// todo is there any point to allow updating user or topic
 		mountEntity(objective, objectiveRequest);
+
+		ValidatorUtil.validateResourceVersions(objective, objectiveRequest);
 
 		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
 	}

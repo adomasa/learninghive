@@ -1,6 +1,6 @@
 package distributed.monolith.learninghive.controller;
 
-import distributed.monolith.learninghive.model.response.TopicTree;
+import distributed.monolith.learninghive.model.response.stats.TopicTree;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.LearningTreeService;
 import lombok.RequiredArgsConstructor;

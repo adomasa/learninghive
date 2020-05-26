@@ -4,7 +4,7 @@ import distributed.monolith.learninghive.domain.LearnedTopic;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
-import distributed.monolith.learninghive.model.response.TopicTree;
+import distributed.monolith.learninghive.model.response.stats.TopicTree;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

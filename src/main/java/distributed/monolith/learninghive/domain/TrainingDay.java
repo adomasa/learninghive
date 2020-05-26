@@ -3,19 +3,16 @@ package distributed.monolith.learninghive.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OptimisticLockType;
-import org.hibernate.annotations.OptimisticLocking;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@OptimisticLocking(type = OptimisticLockType.VERSION)
 @Getter
 @Setter
 @Table(name = "training_day",
 		uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "scheduled_day"}))
-public class TrainingDay {
+public class TrainingDay implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -41,4 +38,7 @@ public class TrainingDay {
 	private String title;
 
 	private String description;
+
+	@Version
+	private Integer version;
 }

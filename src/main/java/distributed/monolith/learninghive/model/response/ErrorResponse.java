@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.model.response;
 
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Data
@@ -9,5 +10,5 @@ public class ErrorResponse {
 
 	String message;
 
-	LocalDateTime timestamp;
+	LocalDateTime timestamp = LocalDateTime.now();
 }

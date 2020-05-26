@@ -16,6 +16,7 @@ import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.restrictions.RestrictionValidator;
 import distributed.monolith.learninghive.service.util.DateUtil;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 
 		var oldTrainingDayDate = trainingDay.getScheduledDay();
 		mountEntity(trainingDay, trainingDayRequest);
+		ValidatorUtil.validateResourceVersions(trainingDay, trainingDayRequest);
 
 		if (!DateUtil.areEqual(trainingDayRequest.getScheduledDay(), oldTrainingDayDate)) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),

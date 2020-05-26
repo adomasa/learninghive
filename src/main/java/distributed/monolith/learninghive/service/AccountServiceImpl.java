@@ -10,6 +10,7 @@ import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.repository.UserRefreshTokenRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.AuthTokenProvider;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -85,6 +86,8 @@ public class AccountServiceImpl implements AccountService {
 						User.class,
 						userId
 				));
+
+		ValidatorUtil.validateResourceVersions(userToUpdate, userRequest);
 
 		userToUpdate.setEmail(userRequest.getEmail());
 		userToUpdate.setName(userRequest.getName());
