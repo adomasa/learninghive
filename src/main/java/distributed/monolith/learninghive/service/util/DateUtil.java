@@ -1,7 +1,5 @@
 package distributed.monolith.learninghive.service.util;
 
-import distributed.monolith.learninghive.model.exception.ChangingPastTrainingDayException;
-
 import java.time.LocalDate;
 
 public final class DateUtil {
@@ -9,9 +7,11 @@ public final class DateUtil {
 	private DateUtil() {
 	}
 
-	public static void throwIfPastDate(java.sql.Date date) throws ChangingPastTrainingDayException {
-		if (LocalDate.now().isAfter(date.toLocalDate())) {
-			throw new ChangingPastTrainingDayException();
-		}
+	public static boolean isPastDate(java.sql.Date date) {
+		return LocalDate.now().isAfter(date.toLocalDate());
+	}
+
+	public static boolean areEqual(java.sql.Date date1, java.sql.Date date2) {
+		return date1.toLocalDate().equals(date2.toLocalDate());
 	}
 }

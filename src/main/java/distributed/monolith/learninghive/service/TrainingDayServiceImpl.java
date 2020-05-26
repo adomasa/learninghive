@@ -4,6 +4,7 @@ import distributed.monolith.learninghive.domain.Restriction;
 import distributed.monolith.learninghive.domain.Topic;
 import distributed.monolith.learninghive.domain.TrainingDay;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.exception.ChangingPastTrainingDayException;
 import distributed.monolith.learninghive.model.exception.DuplicateResourceException;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.exception.RestrictionViolationException;
@@ -20,7 +21,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +45,8 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		authorityService.validateLoggedUserOrSupervisorOf(trainingDayRequest.getUserId());
 		// second parameter is only important when updating existing entity
 		throwIfDuplicate(trainingDayRequest, -1L);
+		throwIfPastDate(trainingDayRequest.getScheduledDay());
 
-		// todo don't allow adding training day in the past
 		TrainingDay trainingDay = new TrainingDay();
 		mountEntity(trainingDay, trainingDayRequest);
 
@@ -63,18 +64,16 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, trainingDayId));
 
 		throwIfDuplicate(trainingDayRequest, trainingDayId);
-		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
 
-		// todo should only be able to edit description
+		// Only allow editing description of past training days
+		if (isAnyNotDescriptionFieldChanged(trainingDay, trainingDayRequest)) {
+			throwIfPastDate(trainingDay.getScheduledDay());
+		}
 
-		//if (trainingDay.getScheduledDay().getTime() <= new Date().getTime()) {
-		//	throw new ChangingPastTrainingDayException();
-		//}
-		LocalDate oldTrainingDayDate = trainingDay.getScheduledDay().toLocalDate();
+		var oldTrainingDayDate = trainingDay.getScheduledDay();
 		mountEntity(trainingDay, trainingDayRequest);
 
-		// Compare strings to compare only date without time
-		if (!oldTrainingDayDate.equals(trainingDayRequest.getScheduledDay().toLocalDate())) {
+		if (!DateUtil.areEqual(trainingDayRequest.getScheduledDay(), oldTrainingDayDate)) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
 					trainingDay.getUser().getId());
 			throwIfViolatesRestrictions(trainingDays, trainingDay);
@@ -100,7 +99,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		TrainingDay trainingDay = trainingDayRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(TrainingDay.class, id));
-		DateUtil.throwIfPastDate(trainingDay.getScheduledDay());
+		throwIfPastDate(trainingDay.getScheduledDay());
 
 		trainingDayRepository.delete(trainingDay);
 	}
@@ -136,6 +135,12 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 				});
 	}
 
+	private void throwIfPastDate(Date date) {
+		if (DateUtil.isPastDate(date)) {
+			throw new ChangingPastTrainingDayException();
+		}
+	}
+
 	private void throwIfViolatesRestrictions(List<TrainingDay> existingTrainingDays, TrainingDay trainingDay) {
 		List<Restriction> restrictions = findApplicableRestrictions(trainingDay.getUser().getId());
 
@@ -144,6 +149,26 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		if (restriction != null) {
 			throw new RestrictionViolationException(restriction);
 		}
+	}
+
+	private boolean isAnyNotDescriptionFieldChanged(TrainingDay trainingDay, TrainingDayRequest request) {
+		if (!DateUtil.areEqual(trainingDay.getScheduledDay(), request.getScheduledDay())
+				|| !trainingDay.getTitle().equals(request.getTitle())
+				|| trainingDay.getUser().getId() != request.getUserId()) {
+			return true;
+		}
+
+		var topicIds = trainingDay.getTopics()
+				.stream()
+				.map(t -> t.getId())
+				.sorted()
+				.collect(Collectors.toList());
+
+		return !topicIds.equals(request.getTopicIds()
+				.stream()
+				.distinct()
+				.sorted()
+				.collect(Collectors.toList()));
 	}
 
 	private List<Restriction> findApplicableRestrictions(Long userId) {
