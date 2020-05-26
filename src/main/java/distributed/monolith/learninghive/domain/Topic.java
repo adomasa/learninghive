@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class Topic {
+public class Topic implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -38,5 +38,5 @@ public class Topic {
 	List<TrainingDay> trainingDays = new ArrayList<>();
 
 	@Version
-	private int version;
+	private Integer version;
 }

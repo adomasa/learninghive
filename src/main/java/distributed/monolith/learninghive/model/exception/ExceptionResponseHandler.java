@@ -25,7 +25,7 @@ public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(OptimisticLockException.class)
 	public ResponseEntity<ErrorResponse> handleRestrictionViolatedException(OptimisticLockException ex) {
 		var errorResponse = new ErrorResponse();
-		errorResponse.setMessage("Resource is out of sync with system. Try again.");
+		errorResponse.setMessage(ex.getMessage());
 		errorResponse.setStatus(HttpStatus.CONFLICT.value());
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
 	}

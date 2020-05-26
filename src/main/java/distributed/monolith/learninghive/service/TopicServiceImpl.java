@@ -13,6 +13,7 @@ import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,6 @@ public class TopicServiceImpl implements TopicService {
 		var topic = new Topic();
 		mountEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
-
 		if (topicRepository.isCircularHierarchy(topic.getId())) {
 			throw new CircularHierarchyException(Topic.class);
 		}
@@ -56,6 +56,8 @@ public class TopicServiceImpl implements TopicService {
 		var topic = topicRepository
 				.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, id));
+		ValidatorUtil.validateResourceVersions(topic, topicRequest);
+
 		mountEntity(topic, topicRequest);
 		topic = topicRepository.saveAndFlush(topic);
 
@@ -106,7 +108,6 @@ public class TopicServiceImpl implements TopicService {
 	private void mountEntity(Topic destination, TopicRequest source) {
 		destination.setTitle(source.getTitle());
 		destination.setContent(source.getContent());
-		destination.setVersion(source.getVersion());
 
 		mountChildren(destination, source.getChildrenId());
 		mountParent(destination, source.getParentId());

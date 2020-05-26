@@ -11,6 +11,7 @@ import distributed.monolith.learninghive.model.response.RestrictionResponse;
 import distributed.monolith.learninghive.repository.RestrictionRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.restrictions.RestrictionType;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class RestrictionServiceImpl implements RestrictionService {
 			throwIfDuplicate(restrictionRequest.getUserId(), restrictionRequest.getRestrictionType());
 		}
 
+		ValidatorUtil.validateResourceVersions(restriction, restrictionRequest);
 		mountEntity(restriction, restrictionRequest);
 		return modelMapper.map(restrictionRepository.save(restriction), RestrictionResponse.class);
 	}
@@ -122,7 +124,6 @@ public class RestrictionServiceImpl implements RestrictionService {
 					.orElseThrow(() -> new ResourceNotFoundException(User.class, source.getUserId()));
 		}
 		destination.setUser(user);
-		destination.setVersion(source.getVersion());
 	}
 
 	private void throwIfDuplicate(Long userId, RestrictionType type) {

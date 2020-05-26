@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class User {
+public class User implements VersionedEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -50,5 +50,5 @@ public class User {
 	private List<User> subordinates = new ArrayList<>();
 
 	@Version
-	private int version;
+	private Integer version;
 }

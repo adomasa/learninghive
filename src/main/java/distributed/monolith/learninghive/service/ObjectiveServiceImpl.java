@@ -11,6 +11,7 @@ import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.security.SecurityService;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 		authorityService.validateLoggedUserOrSupervisor(objective.getUser());
 
 		mountEntity(objective, objectiveRequest);
+
+		ValidatorUtil.validateResourceVersions(objective, objectiveRequest);
 
 		return modelMapper.map(objectiveRepository.save(objective), ObjectiveResponse.class);
 	}
@@ -105,6 +108,5 @@ public class ObjectiveServiceImpl implements ObjectiveService {
 						)
 				);
 		destination.setUser(user);
-		destination.setVersion(source.getVersion());
 	}
 }

@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @Table(name = "training_day",
 		uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "scheduled_day"}))
-public class TrainingDay {
+public class TrainingDay implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -40,5 +40,5 @@ public class TrainingDay {
 	private String description;
 
 	@Version
-	private int version;
+	private Integer version;
 }

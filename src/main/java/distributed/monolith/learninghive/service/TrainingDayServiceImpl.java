@@ -15,6 +15,7 @@ import distributed.monolith.learninghive.repository.TrainingDayRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.restrictions.RestrictionValidator;
 import distributed.monolith.learninghive.service.util.DateUtil;
+import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -64,6 +65,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		// todo should only be able to edit description
 		LocalDate oldTrainingDayDate = trainingDay.getScheduledDay().toLocalDate();
 		mountEntity(trainingDay, trainingDayRequest);
+		ValidatorUtil.validateResourceVersions(trainingDay, trainingDayRequest);
 
 		if (!oldTrainingDayDate.equals(trainingDayRequest.getScheduledDay().toLocalDate())) {
 			List<TrainingDay> trainingDays = trainingDayRepository.findByIdNotAndUserId(trainingDay.getId(),
@@ -98,7 +100,6 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		destination.setTitle(source.getTitle());
 		destination.setDescription(source.getDescription());
 		destination.setScheduledDay(source.getScheduledDay());
-		destination.setVersion(source.getVersion());
 
 		User user = userRepository
 				.findById(source.getUserId())

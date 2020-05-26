@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Table(name = "objectives", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "topic_id"}))
-public class Objective {
+public class Objective implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -34,5 +34,5 @@ public class Objective {
 	private Date date;
 
 	@Version
-	private int version;
+	private Integer version;
 }

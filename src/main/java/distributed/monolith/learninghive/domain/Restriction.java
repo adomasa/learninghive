@@ -12,7 +12,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Table(name = "restrictions", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "restriction_type"}))
-public class Restriction {
+public class Restriction implements VersionedEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -31,5 +31,5 @@ public class Restriction {
 	private Date date;
 
 	@Version
-	private int version;
+	private Integer version;
 }
