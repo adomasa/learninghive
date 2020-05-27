@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EmailService implements InvitationProviderService {
-	private static Logger LOG = LoggerFactory.getLogger(EmailService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EmailService.class);
 	private final InvitationRepository invitationRepository;
 	private final JavaMailSender javaMailSender;
 
