@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -169,6 +170,10 @@ public class TopicServiceImpl implements TopicService {
 
 		Topic parent = topicRepository.findById(parentId)
 				.orElseThrow(() -> new ResourceNotFoundException(Topic.class, parentId));
+
+		if (parent.getChildren() == null) {
+			parent.setChildren(new ArrayList<>());
+		}
 		parent.getChildren().add(child);
 
 		return parent;
