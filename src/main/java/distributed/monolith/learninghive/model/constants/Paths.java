@@ -29,6 +29,7 @@ public final class Paths {
 	public static final String TREE_USER = "stats/learning-tree/user";
 	public static final String TREE_SUBORDINATES = "stats/learning-tree/subordinates";
 
+	public static final String TEST_DATA = "/testData";
 	private Paths() {
 	}
 }
