@@ -70,6 +70,7 @@ public class AccountController {
 	}
 
 	@PostMapping(path = ACCOUNT_INVITE)
+	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	void sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		var userId = securityService.getLoggedUserId();
