@@ -10,13 +10,14 @@ import distributed.monolith.learninghive.model.request.UserRequest;
 import distributed.monolith.learninghive.model.response.TokenPair;
 import distributed.monolith.learninghive.security.SecurityService;
 import distributed.monolith.learninghive.service.AccountService;
-import distributed.monolith.learninghive.service.EmailService;
+import distributed.monolith.learninghive.service.InvitationProviderService;
 import distributed.monolith.learninghive.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.concurrent.CompletableFuture;
 
 import static distributed.monolith.learninghive.model.constants.Paths.*;
 
@@ -28,7 +29,7 @@ public class AccountController {
 	private final UserService userService;
 	private final SecurityService securityService;
 
-	private final EmailService emailService;
+	private final InvitationProviderService invitationProviderService;
 
 	@PostMapping(path = ACCOUNT_REGISTER)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -70,10 +71,11 @@ public class AccountController {
 
 	@PostMapping(path = ACCOUNT_INVITE)
 	public @ResponseBody
-	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
+	void sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		var userId = securityService.getLoggedUserId();
-		var invitationLink = userService.createInvitationLink(userInvitation, userId);
-		emailService.sendEmail(userInvitation.getEmail(), "Invitation link", invitationLink);
-		return invitationLink;
+		CompletableFuture.runAsync(() -> {
+			var invitationData = userService.createInvitation(userInvitation, userId);
+			invitationProviderService.send(invitationData);
+		});
 	}
 }

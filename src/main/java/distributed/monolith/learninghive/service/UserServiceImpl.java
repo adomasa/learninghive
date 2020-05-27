@@ -3,6 +3,7 @@ package distributed.monolith.learninghive.service;
 import distributed.monolith.learninghive.domain.Invitation;
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.InvitationData;
 import distributed.monolith.learninghive.model.authority.AuthorityType;
 import distributed.monolith.learninghive.model.exception.*;
 import distributed.monolith.learninghive.model.exception.InvalidTokenException.Type;
@@ -101,7 +102,7 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public String createInvitationLink(UserInvitation userInvitation, long userId) {
+	public InvitationData createInvitation(UserInvitation userInvitation, long userId) {
 		if (userRepository.findByEmail(userInvitation.getEmail()).isPresent()) {
 			throw new DuplicateResourceException(User.class, "email", userInvitation.getEmail());
 		}
@@ -122,12 +123,18 @@ public class UserServiceImpl implements UserService {
 				)
 		);
 
-		return UriComponentsBuilder.newInstance()
+		var invitationLink = UriComponentsBuilder.newInstance()
 				.scheme(frontendScheme)
 				.host(frontendUrl)
 				.path(frontendRegistrationPath)
 				.queryParam(TOKEN_ARG_NAME, invitation.getValidationToken()).build()
 				.toUriString();
+
+		return InvitationData
+				.builder()
+				.recipient(userInvitation.getEmail())
+				.source(userWhoInvited.getName() + " " + userWhoInvited.getSurname())
+				.link(invitationLink).build();
 	}
 
 	@Override
