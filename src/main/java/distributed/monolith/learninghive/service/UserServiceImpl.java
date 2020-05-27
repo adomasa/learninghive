@@ -133,6 +133,7 @@ public class UserServiceImpl implements UserService {
 		return InvitationData
 				.builder()
 				.recipient(userInvitation.getEmail())
+				.invitationId(invitation.getId())
 				.source(userWhoInvited.getName() + " " + userWhoInvited.getSurname())
 				.link(invitationLink).build();
 	}

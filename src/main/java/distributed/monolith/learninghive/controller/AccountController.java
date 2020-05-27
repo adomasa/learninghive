@@ -72,11 +72,11 @@ public class AccountController {
 	@PostMapping(path = ACCOUNT_INVITE)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
-	void sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
+	String sendGeneratedRegistrationLink(@Valid @RequestBody UserInvitation userInvitation) {
 		var userId = securityService.getLoggedUserId();
-		CompletableFuture.runAsync(() -> {
-			var invitationData = userService.createInvitation(userInvitation, userId);
-			invitationProviderService.send(invitationData);
-		});
+		var invitationData = userService.createInvitation(userInvitation, userId);
+		CompletableFuture.runAsync(() -> invitationProviderService.send(invitationData));
+
+		return invitationData.getLink();
 	}
 }
