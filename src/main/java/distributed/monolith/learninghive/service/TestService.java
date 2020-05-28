@@ -5,5 +5,5 @@ public interface TestService {
 
 	void addTestUsers(Long loggedUserId);
 
-	void addTestTopicsToUsers();
+	void addTestTopicsToUsers(int randomTopicCount, int randomObjectiveCount);
 }
