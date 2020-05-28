@@ -6,7 +6,6 @@ import distributed.monolith.learninghive.domain.User;
 import distributed.monolith.learninghive.model.exception.ResourceNotFoundException;
 import distributed.monolith.learninghive.model.response.LearnedTopicsResponse;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
-import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
 import distributed.monolith.learninghive.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +21,12 @@ public class LearnedTopicServiceImpl implements LearnedTopicService {
 	private final TopicRepository topicRepository;
 	private final LearnedTopicRepository learnedTopicRepository;
 	private final UserRepository userRepository;
-	private final ObjectiveRepository objectiveRepository;
 	private final AuthorityService authorityService;
 
 	@Override
 	@Transactional
 	public void createLearnedTopic(long topicId, long userId) {
 		authorityService.validateLoggedUserOrAdmin(userId);
-		objectiveRepository.deleteByUserIdAndTopicId(userId, topicId);
 
 		if (learnedTopicRepository.findByUserIdAndTopicId(userId, topicId).isPresent()) {
 			return;
