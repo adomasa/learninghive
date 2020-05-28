@@ -12,7 +12,6 @@ import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
-import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -30,7 +29,6 @@ public class TopicServiceImpl implements TopicService {
 	private final ObjectiveRepository objectiveRepository;
 	private final TopicRepository topicRepository;
 	private final LearnedTopicRepository learnedTopicRepository;
-	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
