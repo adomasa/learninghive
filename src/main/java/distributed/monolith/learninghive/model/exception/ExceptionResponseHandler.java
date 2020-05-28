@@ -1,6 +1,7 @@
 package distributed.monolith.learninghive.model.exception;
 
 import distributed.monolith.learninghive.model.response.ErrorResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,6 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.persistence.OptimisticLockException;
 
 @ControllerAdvice
+@RequiredArgsConstructor
 public class ExceptionResponseHandler extends ResponseEntityExceptionHandler {
 	private static final int RESTRICTION_VIOLATED_STATUS = 432;
 
