@@ -22,7 +22,7 @@ public class EmailService implements InvitationProviderService {
 	private final JavaMailSender javaMailSender;
 
 	private static final String INVITATION_MESSAGE_FORMAT = "Greetings, \n" +
-			"You have been invited to LearningHive" +
+			"You have been invited to LearningHive " +
 			"system by %s. Please register using provided link: %s";
 
 	@Override
