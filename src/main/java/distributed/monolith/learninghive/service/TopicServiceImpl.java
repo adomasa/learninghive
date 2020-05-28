@@ -12,7 +12,6 @@ import distributed.monolith.learninghive.model.response.TopicResponse;
 import distributed.monolith.learninghive.repository.LearnedTopicRepository;
 import distributed.monolith.learninghive.repository.ObjectiveRepository;
 import distributed.monolith.learninghive.repository.TopicRepository;
-import distributed.monolith.learninghive.repository.UserRepository;
 import distributed.monolith.learninghive.service.util.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,13 +30,12 @@ public class TopicServiceImpl implements TopicService {
 	private final ObjectiveRepository objectiveRepository;
 	private final TopicRepository topicRepository;
 	private final LearnedTopicRepository learnedTopicRepository;
-	private final UserRepository userRepository;
 	private final ModelMapper modelMapper;
 
 	@Override
 	@Transactional
 	public TopicResponse createTopic(TopicRequest topicRequest) {
-		validateTopicTitle(topicRequest.getTitle());
+		validateTopicTitle(topicRequest.getTitle(), -1);
 
 		var topic = new Topic();
 		mountEntity(topic, topicRequest);
@@ -52,7 +50,7 @@ public class TopicServiceImpl implements TopicService {
 	@Override
 	@Transactional
 	public TopicResponse updateTopic(Long id, TopicRequest topicRequest) {
-		validateTopicTitle(topicRequest.getTitle());
+		validateTopicTitle(topicRequest.getTitle(), id);
 
 		var topic = topicRepository
 				.findById(id)
@@ -157,10 +155,12 @@ public class TopicServiceImpl implements TopicService {
 		}
 	}
 
-	private void validateTopicTitle(String title) {
-		if (topicRepository.findByTitle(title).isPresent()) {
-			throw new DuplicateResourceException(Topic.class, "title", title);
-		}
+	private void validateTopicTitle(String title, long id) {
+		topicRepository.findByTitle(title).ifPresent(topic -> {
+			if (topic.getId() != id) {
+				throw new DuplicateResourceException(Topic.class, "title", title);
+			}
+		});
 	}
 
 	private Topic getUpdatedParentEntity(Topic child, Long parentId) {

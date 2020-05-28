@@ -38,4 +38,7 @@ public class Invitation implements VersionedEntity {
 
 	@Version
 	private Integer version;
+
+	@Column(nullable = false)
+	private DeliveryStatus deliveryStatus = DeliveryStatus.SUCCESS;
 }

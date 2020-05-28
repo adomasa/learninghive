@@ -2,6 +2,7 @@ package distributed.monolith.learninghive.service;
 
 import distributed.monolith.learninghive.domain.Role;
 import distributed.monolith.learninghive.domain.User;
+import distributed.monolith.learninghive.model.InvitationData;
 import distributed.monolith.learninghive.model.request.UserInvitation;
 import distributed.monolith.learninghive.model.request.UserRegistration;
 import distributed.monolith.learninghive.model.response.UserInfo;
@@ -13,7 +14,7 @@ public interface UserService {
 
 	User registerUser(String invitationToken, UserRegistration userRegistration, Role role);
 
-	String createInvitationLink(UserInvitation userInvitation, long userId);
+	InvitationData createInvitation(UserInvitation userInvitation, long userId);
 
 	UserInfo getUserInfo(long userId);
 
