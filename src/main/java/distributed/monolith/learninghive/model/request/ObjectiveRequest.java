@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.NotNull;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class ObjectiveRequest extends VersionedResourceRequest {
 	Long userId;
 
