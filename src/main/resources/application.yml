@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url:
+    username:
+    password:
+    hikari:
+      connectionTimeout: 20000
+      maximumPoolSize: 5
+  jpa:
+    hibernate:
+      ddl-auto: create #drop n create table again, good for testing, comment this in production
+
+security:
+  jwt:
+    token:
+      #https://www.grc.com/passwords.htm  63 random printable ASCII characters:
+      secret:
+      expireLength: 900000 # 15 minutes
+
+frontend:
+  scheme: "http"
+  url: "localhost:3001"
+  ip: "localhost"
+  port: "3001"
+  registrationPath: "/signup"
+
+email:
+  username:
+  password:
+  host: smtp.gmail.com
+
+logging:
+  logFile: "learningHive.log"

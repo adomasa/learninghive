@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean class="distributed.monolith.learninghive.restrictions.YearRestrictionValidator">
+        <constructor-arg>
+            <bean class="distributed.monolith.learninghive.restrictions.QuarterRestrictionValidator">
+                <constructor-arg>
+                    <bean class="distributed.monolith.learninghive.restrictions.MonthRestrictionValidator">
+                        <constructor-arg>
+                            <bean class="distributed.monolith.learninghive.restrictions.WeekRestrictionValidator">
+                                <constructor-arg>
+                                    <bean class="distributed.monolith.learninghive.restrictions.DayRestrictionValidator">
+                                        <constructor-arg>
+                                            <bean class="distributed.monolith.learninghive.restrictions.RestrictionValidator"/>
+                                        </constructor-arg>
+                                    </bean>
+                                </constructor-arg>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+</beans>
